@@ -76,24 +76,6 @@ export const PUtils = {
 		}
 	},
 	Object: {
-		clone(obj: unknown | unknown[]): unknown | unknown[] {
-			if (obj instanceof Array) {
-				return obj.map(o => PUtils.Object.clone(o))
-			} else if (obj != null && typeof obj == 'object') {
-				const cloned: URecord = {}
-				for (const property in obj) {
-					const reference = (obj as URecord)[property]
-					if (reference != null && typeof reference == 'object') {
-						cloned[property] = PUtils.Object.clone(reference as URecord)
-					} else {
-						cloned[property] = reference
-					}
-				}
-				return cloned
-			} else {
-				return obj
-			}
-		},
 		getValue(target: URecord, path: string, stringToObject = true): unknown {
 			const arr = path.split(/\./)
 			let reference: unknown = target
@@ -854,5 +836,18 @@ export const PUtils = {
 
 		const result = new Function(toEval)()
 		return (isNaN(result) && typeof result !== 'string') ? null : result
+	},
+	clone(source: unknown): unknown {
+		if (source instanceof Array) {
+			return source.map(o => PUtils.clone(o))
+		} else if (source == null || typeof source != 'object') {
+			return source
+		} else if (typeof source == 'object') {
+			const cloned: URecord = {}
+			for (const property in source) {
+				cloned[property] = PUtils.clone(source[property])
+			}
+			return cloned
+		}
 	},
 }
