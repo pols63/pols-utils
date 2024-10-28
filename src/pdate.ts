@@ -172,7 +172,7 @@ export class PDate {
 			let miliseconds: number
 
 			/* Formato estandar yyyy-mm-dd, la hora es opcional */
-			let parts = value.match(/^([0-9]{4})-([0-9]{2})-([0-9]{2})((T|\s)([0-9]{2}):([0-9]{2}):([0-9]{2})\.([0-9]{3})Z?)?$/)
+			let parts = value.match(/^([0-9]{4})-([0-9]{2})-([0-9]{2})((T|\s)([0-9]{2}):([0-9]{2}):([0-9]{2})(\.([0-9]{3})Z?)?)$/)
 			if (parts) {
 				year = Number(parts[1])
 				month = Number(parts[2]) - 1
@@ -180,7 +180,7 @@ export class PDate {
 				hours = Number(parts[6] ?? 0)
 				minutes = Number(parts[7] ?? 0)
 				seconds = Number(parts[8] ?? 0)
-				miliseconds = Number(parts[9] ?? 0)
+				miliseconds = Number(parts[10] ?? 0)
 			} else {
 				const today = new Date
 				/* Formato humano */
