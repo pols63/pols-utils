@@ -14,10 +14,6 @@
 		".": {
 			"require": "./dist/cjs/index.js",
 			"import": "./dist/esm/index.js"
-		},
-		"./datePlus": {
-			"require": "./dist/cjs/datePlus.js",
-			"import": "./dist/esm/datePlus.js"
 		}
 	},
 	"author": "Jean Paul Sánchez mendoza",
