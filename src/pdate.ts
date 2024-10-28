@@ -1,7 +1,7 @@
 import { date_Format } from "./base"
 import { Languages } from "./types"
 
-export type DatePlusParams = string | number | Date | DatePlus | {
+export type PDateParams = string | number | Date | PDate | {
 	dateOnly?: boolean
 } | {
 	year?: number
@@ -13,7 +13,7 @@ export type DatePlusParams = string | number | Date | DatePlus | {
 	milisecond?: number
 }
 
-export class DatePlus {
+export class PDate {
 	engine?: Date
 
 	get isInvalidDate() {
@@ -137,11 +137,11 @@ export class DatePlus {
 		return this.engine?.getTime()
 	}
 
-	constructor(params?: DatePlusParams) {
+	constructor(params?: PDateParams) {
 		if (!params) {
 			this.engine = new Date
 		} else {
-			if (typeof params == 'string' || typeof params == 'number' || params instanceof Date || params instanceof DatePlus) {
+			if (typeof params == 'string' || typeof params == 'number' || params instanceof Date || params instanceof PDate) {
 				this.setFrom(params)
 			} else {
 				if ('dateOnly' in params) {
@@ -161,7 +161,7 @@ export class DatePlus {
 		}
 	}
 
-	setFrom(value: string | number | Date | DatePlus) {
+	setFrom(value: string | number | Date | PDate) {
 		if (typeof value == 'string') {
 			let year: number
 			let month: number
@@ -205,7 +205,7 @@ export class DatePlus {
 			this.setFrom(value.toString())
 		} else if (value instanceof Date) {
 			this.engine = new Date(value)
-		} else if (value instanceof DatePlus) {
+		} else if (value instanceof PDate) {
 			this.engine = value.toDate()
 		}
 		return this
@@ -230,7 +230,7 @@ export class DatePlus {
 		return this
 	}
 
-	daysDifference(other: DatePlus) {
+	daysDifference(other: PDate) {
 		if (this.isInvalidDate) throw new Error(`Este objeto es un InvalidDate`)
 		if (other.isInvalidDate) throw new Error(`El objeto de comparación es un InvalidDate`)
 		return Math.ceil(((this.time ?? 0) - (other.time ?? 0)) / 1000 / 60 / 60 / 24)
@@ -246,6 +246,6 @@ export class DatePlus {
 	}
 
 	clone() {
-		return new DatePlus(this.engine)
+		return new PDate(this.engine)
 	}
 }
