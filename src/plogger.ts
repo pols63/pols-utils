@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import { URecord } from "./types"
-import { PUtils } from '.'
+import { PUtils } from './index'
 
 type Themes = 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR' | 'DEBUG' | 'SYSTEM'
 
