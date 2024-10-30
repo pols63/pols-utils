@@ -8,7 +8,7 @@ type Themes = 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR' | 'DEBUG' | 'SYSTEM'
 export type PLoggerParams = {
 	label: string
 	description?: string
-	body?: string | URecord | string[]
+	body?: string | URecord | unknown[]
 	date?: Date
 	exit?: boolean
 	showInConsole?: boolean
@@ -24,7 +24,22 @@ const logger = (theme: Themes, { label, description, body, exit = false, showInC
 
 	const textBody: string[] = []
 	if (body instanceof Array) {
-		textBody.push(...body)
+		textBody.push(...body.map(b => {
+			if (b instanceof Error) {
+				return [
+					'Error: ' + b.message,
+					b.stack.replace(/^Error.*?\n/, '')
+				]
+			} else if (typeof b == 'string') {
+				return b
+			} else if (typeof b == 'number') {
+				return b.toString()
+			} else if (b == null) {
+				return ''
+			} else {
+				b.toString()
+			}
+		}).flat())
 	} else if (body instanceof Error) {
 		textBody.push(
 			'Error: ' + body.message,
