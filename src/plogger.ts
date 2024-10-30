@@ -15,7 +15,7 @@ export type PLoggerParams = {
 	logPath?: string
 }
 
-export const logger = (theme: Themes, { label, description, body, exit = false, showInConsole, logPath }: PLoggerParams) => {
+const logger = (theme: Themes, { label, description, body, exit = false, showInConsole, logPath }: PLoggerParams) => {
 	const now = new Date
 	const nowString = PUtils.Date.format(now, '@dd/@mm/@y @hh:@ii:@ss.@lll')
 
