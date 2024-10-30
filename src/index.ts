@@ -5,6 +5,7 @@ import { PDate } from './pdate'
 import { date_Format, dayName, left, monthName, padLeft, padRight, right } from './base'
 
 export { PDate }
+export { PLogger } from './plogger'
 
 export type IterationFunction<T> = (element: T, index: number) => boolean
 
