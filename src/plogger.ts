@@ -70,13 +70,13 @@ const logger = (theme: Themes, { label, description, body, exit = false, showInC
 				logger('ERROR', { label: 'LOG', description: `Ocurrió un error al intentar crear el directorio para los logs del sistema en '${logPath}'`, body: error, exit: true, showInConsole: true })
 			}
 		}
-	}
 
-	const filePath = path.join(logPath, `LOGS ${PUtils.Date.format(now, '@y-@mm-@dd')}.log`)
-	try {
-		if (logPath) fs.appendFileSync(filePath, `${headers.join(' ')}\n${textBody.join('\n')}\n`, { encoding: 'utf-8' })
-	} catch (error) {
-		logger('ERROR', { label: 'LOG', description: `Ocurrió un error al intentar registrar una entrada en el archivo '${filePath}'`, body: error, exit: true, showInConsole: true })
+		const filePath = path.join(logPath, `LOGS ${PUtils.Date.format(now, '@y-@mm-@dd')}.log`)
+		try {
+			if (logPath) fs.appendFileSync(filePath, `${headers.join(' ')}\n${textBody.join('\n')}\n`, { encoding: 'utf-8' })
+		} catch (error) {
+			logger('ERROR', { label: 'LOG', description: `Ocurrió un error al intentar registrar una entrada en el archivo '${filePath}'`, body: error, exit: true, showInConsole: true })
+		}
 	}
 
 	/* Si se ha dado la opción, se sale del programa */

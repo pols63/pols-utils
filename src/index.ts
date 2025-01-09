@@ -10,12 +10,12 @@ export { PLogger } from './plogger'
 export type IterationFunction<T> = (element: T, index: number) => boolean
 
 export type ToMatch = {
-	ne?: string | number,
-	eq?: string | number,
-	lt?: string | number,
-	lte?: string | number,
-	gt?: string | number,
-	gte?: string | number,
+	ne?: number,
+	eq?: number,
+	lt?: number,
+	lte?: number,
+	gt?: number,
+	gte?: number,
 	in?: number[],
 }
 
@@ -731,7 +731,7 @@ export const PUtils = {
 			})
 		},
 		toArrayBuffer(readableStream: stream.Readable): Promise<ArrayBuffer> {
-			const chunks: Uint8Array[] = []
+			const chunks: Buffer[] = []
 
 			return new Promise((resolve, reject) => {
 				readableStream.on('data', chunk => {
@@ -739,7 +739,8 @@ export const PUtils = {
 				})
 
 				readableStream.on('end', () => {
-					resolve(Buffer.concat(chunks))
+					const buffer = Buffer.concat(chunks)
+					resolve(buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength))
 				})
 
 				readableStream.on('error', reject)
