@@ -27,6 +27,7 @@ export type PLoggerParams = {
 export type PLoggerLogParams = {
 	label: string
 	description?: string
+	tags?: string[]
 	body?: string | URecord | unknown[]
 	exit?: boolean
 }
@@ -43,12 +44,13 @@ const check = (theme: Themes, value?: PLoggerShowInParams) => {
 	}
 }
 
-const logger = (theme: Themes, pLogger: PLogger, { label, description, body, exit = false }: PLoggerLogParams) => {
+const logger = (theme: Themes, pLogger: PLogger, { label, description, body, exit = false, tags }: PLoggerLogParams) => {
 	const now = new PDate
 	const nowString = now.toString('@dd/@mm/@y @hh:@ii:@ss.@lll')
 
 	const headers: string[] = [`[${theme}]`, nowString, '::', label]
 	if (description) headers.push('::', description)
+	if (tags?.length) headers.push(...tags.map(tag => `[${tag}]`))
 
 	const textBody: string[] = []
 	if (body instanceof Array) {
