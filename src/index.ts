@@ -710,7 +710,7 @@ export const PUtils = {
 		},
 	},
 	ReadableStream: {
-		isReadableSream(value: unknown): value is ReadableStream {
+		isReadableSream(value: unknown): value is stream.Readable {
 			return (
 				typeof value === 'object'
 				&& value !== null
