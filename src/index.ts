@@ -710,6 +710,15 @@ export const PUtils = {
 		},
 	},
 	ReadableStream: {
+		isReadableSream(value: unknown): value is ReadableStream {
+			return (
+				typeof value === 'object'
+				&& value !== null
+				&& 'getReader' in value && typeof value.getReader == 'function'
+				&& 'on' in value && typeof value.on == 'function'
+				&& 'locked' in value && typeof value.locked == 'function'
+			)
+		},
 		toString(readableStream: stream.Readable, encoding?: 'base64'): Promise<string> {
 			const chunks: Uint8Array[] = []
 
@@ -746,6 +755,11 @@ export const PUtils = {
 				readableStream.on('error', reject)
 			})
 		},
+	},
+	ArrayBuffer: {
+		toString(data: ArrayBuffer, encode = 'utf-8') {
+			return new TextDecoder(encode).decode(new Uint8Array(data))
+		}
 	},
 	Function: {
 		throttle: (func: (...args: unknown[]) => void, delay: number) => {
