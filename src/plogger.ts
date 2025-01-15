@@ -1,23 +1,51 @@
 import fs from 'fs'
 import path from 'path'
 import { URecord } from "./types"
-import { PUtils } from './index'
+import { PDate, PUtils } from './index'
 
-type Themes = 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR' | 'DEBUG' | 'SYSTEM'
+type Themes = 'INFO' | 'WARNING' | 'ERROR' | 'DEBUG' | 'SYSTEM'
+
+export type PLoggerShowInParams = boolean | {
+	info?: boolean
+	warning?: boolean
+	error?: boolean
+	debug?: boolean
+	system?: boolean
+}
+
+export type PLoggerShowInConfig = {
+	console?: PLoggerShowInParams
+	file?: PLoggerShowInParams
+}
 
 export type PLoggerParams = {
+	destinationPath?: string
+	fileName?: () => string
+	showIn?: PLoggerShowInConfig
+}
+
+export type PLoggerLogParams = {
 	label: string
 	description?: string
 	body?: string | URecord | unknown[]
-	date?: Date
 	exit?: boolean
-	showInConsole?: boolean
-	logPath?: string
 }
 
-const logger = (theme: Themes, { label, description, body, exit = false, showInConsole, logPath }: PLoggerParams) => {
-	const now = new Date
-	const nowString = PUtils.Date.format(now, '@dd/@mm/@y @hh:@ii:@ss.@lll')
+const check = (theme: Themes, value?: PLoggerShowInParams) => {
+	if (value == null || value == true) return true
+	if (value == false) return false
+	switch (theme) {
+		case 'INFO': return value.info
+		case 'WARNING': return value.warning
+		case 'ERROR': return value.error
+		case 'DEBUG': return value.debug
+		case 'SYSTEM': return value.system
+	}
+}
+
+const logger = (theme: Themes, pLogger: PLogger, { label, description, body, exit = false }: PLoggerLogParams) => {
+	const now = new PDate
+	const nowString = now.toString('@dd/@mm/@y @hh:@ii:@ss.@lll')
 
 	const headers: string[] = [`[${theme}]`, nowString, '::', label]
 	if (description) headers.push('::', description)
@@ -49,8 +77,8 @@ const logger = (theme: Themes, { label, description, body, exit = false, showInC
 		textBody.push(body)
 	}
 
-	/* Mensaje en consola */
-	if (showInConsole) {
+	/* Por defecto, muestra el mensaje en consola */
+	if (check(theme, pLogger.showIn?.console)) {
 		if (theme == 'ERROR') {
 			console.error(headers.join(' '))
 			if (textBody.length) console.error(textBody.join('\n'))
@@ -61,21 +89,24 @@ const logger = (theme: Themes, { label, description, body, exit = false, showInC
 	}
 
 	/* Mensaje en archivo */
-	if (logPath) {
-		if (!fs.existsSync(logPath)) {
+	if (check(theme, pLogger.showIn.file)) {
+		const fileName = pLogger.fileName?.() ?? `LOGS ${now.toString('@y-@mm-@dd')}.log`
+		if (!pLogger.destinationPath) throw new Error(`La propiedad 'destinationPath' es requerida si la entrada debe ir a un archivo`)
+		const filePath = path.join(pLogger.destinationPath, fileName)
+
+		if (!fs.existsSync(pLogger.destinationPath)) {
 			/* Si no existe la carpeta para los logs, se intentará crear automáticamente */
 			try {
-				fs.mkdirSync(logPath, { recursive: true })
+				fs.mkdirSync(pLogger.destinationPath, { recursive: true })
 			} catch (error) {
-				logger('ERROR', { label: 'LOG', description: `Ocurrió un error al intentar crear el directorio para los logs del sistema en '${logPath}'`, body: error, exit: true, showInConsole: true })
+				throw new Error(`No fue posible crear el directorio '${pLogger.destinationPath}': ${error.message}`)
 			}
 		}
 
-		const filePath = path.join(logPath, `LOGS ${PUtils.Date.format(now, '@y-@mm-@dd')}.log`)
 		try {
-			if (logPath) fs.appendFileSync(filePath, `${headers.join(' ')}\n${textBody.join('\n')}\n`, { encoding: 'utf-8' })
+			fs.appendFileSync(filePath, `${headers.join(' ')}\n${textBody.join('\n')}\n`, { encoding: 'utf-8' })
 		} catch (error) {
-			logger('ERROR', { label: 'LOG', description: `Ocurrió un error al intentar registrar una entrada en el archivo '${filePath}'`, body: error, exit: true, showInConsole: true })
+			throw new Error(`No fue posible registrar la entrada en el archivo '${filePath}': ${error.message}`)
 		}
 	}
 
@@ -83,11 +114,34 @@ const logger = (theme: Themes, { label, description, body, exit = false, showInC
 	if (exit) process.exit()
 }
 
-export const PLogger = {
-	info: (params: PLoggerParams) => logger('INFO', params),
-	success: (params: PLoggerParams) => logger('SUCCESS', params),
-	warning: (params: PLoggerParams) => logger('WARNING', params),
-	error: (params: PLoggerParams) => logger('ERROR', params),
-	debug: (params: PLoggerParams) => logger('DEBUG', params),
-	system: (params: PLoggerParams) => logger('SYSTEM', params),
+export class PLogger {
+	destinationPath?: string
+	showIn?: PLoggerShowInConfig
+	fileName?: () => string
+
+	constructor(params?: PLoggerParams) {
+		this.destinationPath = params?.destinationPath
+		this.showIn = params?.showIn
+		this.fileName = params.fileName
+	}
+
+	info(params: PLoggerLogParams) {
+		logger('INFO', this, params)
+	}
+
+	warning(params: PLoggerLogParams) {
+		logger('WARNING', this, params)
+	}
+
+	error(params: PLoggerLogParams) {
+		logger('ERROR', this, params)
+	}
+
+	debug(params: PLoggerLogParams) {
+		logger('DEBUG', this, params)
+	}
+
+	system(params: PLoggerLogParams) {
+		logger('SYSTEM', this, params)
+	}
 }
