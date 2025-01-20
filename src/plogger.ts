@@ -28,7 +28,7 @@ export type PLoggerLogParams = {
 	label: string
 	description?: string
 	tags?: string[]
-	body?: string | URecord | unknown[]
+	body?: string | URecord | unknown[] | Error
 	exit?: boolean
 }
 
