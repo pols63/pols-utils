@@ -2,15 +2,13 @@ import { date_Format } from "./base"
 import { Languages } from "./types"
 
 export type PDateParams = string | number | Date | PDate | {
-	dateOnly?: boolean
-} | {
 	year?: number
 	month?: number
 	day?: number
 	hour?: number
 	minute?: number
 	second?: number
-	milisecond?: number
+	millisecond?: number
 }
 
 export class PDate {
@@ -119,17 +117,17 @@ export class PDate {
 		return this
 	}
 
-	get milisecond(): number | undefined {
+	get millisecond(): number | undefined {
 		return this.engine?.getMilliseconds()
 	}
 
-	set milisecond(value: number) {
+	set millisecond(value: number) {
 		this.engine?.setMilliseconds(value)
 	}
 
-	addMilisecond(value: number) {
+	addMillisecond(value: number) {
 		if (this.isInvalidDate) throw new Error(`Este objeto es un InvalidDate`)
-		this.milisecond = (this.milisecond ?? 0) + value
+		this.millisecond = (this.millisecond ?? 0) + value
 		return this
 	}
 
@@ -144,19 +142,7 @@ export class PDate {
 			if (typeof params == 'string' || typeof params == 'number' || params instanceof Date || params instanceof PDate) {
 				this.setFrom(params)
 			} else {
-				if ('dateOnly' in params) {
-					this.engine = new Date
-					if (params.dateOnly) {
-						this.engine?.setHours(0)
-						this.engine?.setMinutes(0)
-						this.engine?.setSeconds(0)
-						this.engine?.setMilliseconds(0)
-					}
-				} else if ('year' in params || 'month' in params || 'day' in params || 'hour' in params || 'minute' in params || 'second' in params || 'milisecond' in params) {
-					this.engine = new Date(params.year ?? 1, (params.month ?? 1) - 1, params.day ?? 1, params.hour ?? 0, params.minute ?? 0, params.second ?? 0, params.milisecond ?? 0)
-				} else {
-					this.engine = new Date
-				}
+				this.engine = new Date(params.year ?? 1, (params.month ?? 1) - 1, params.day ?? 1, params.hour ?? 0, params.minute ?? 0, params.second ?? 0, params.millisecond ?? 0)
 			}
 		}
 	}
