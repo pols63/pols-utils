@@ -32,9 +32,9 @@ export type PLoggerLogParams = {
 	exit?: boolean
 }
 
-const check = (theme: Themes, value?: PLoggerShowInParams) => {
-	if (value == null || value == true) return true
-	if (value == false) return false
+const check = (theme: Themes, value: null | undefined | PLoggerShowInParams, def: boolean) => {
+	if (value == null) return def
+	if (typeof value == 'boolean') return value
 	switch (theme) {
 		case 'INFO': return value.info
 		case 'WARNING': return value.warning
@@ -80,7 +80,7 @@ const logger = (theme: Themes, pLogger: PLogger, { label, description, body, exi
 	}
 
 	/* Por defecto, muestra el mensaje en consola */
-	if (check(theme, pLogger.showIn?.console)) {
+	if (check(theme, pLogger.showIn?.console, true)) {
 		if (theme == 'ERROR') {
 			console.error(headers.join(' '))
 			if (textBody.length) console.error(textBody.join('\n'))
@@ -91,7 +91,7 @@ const logger = (theme: Themes, pLogger: PLogger, { label, description, body, exi
 	}
 
 	/* Mensaje en archivo */
-	if (check(theme, pLogger.showIn?.file)) {
+	if (check(theme, pLogger.showIn?.file, false)) {
 		const fileName = pLogger.fileName?.() ?? `LOGS ${now.toString('@y-@mm-@dd')}.log`
 		if (!pLogger.destinationPath) throw new Error(`La propiedad 'destinationPath' es requerida si la entrada debe ir a un archivo`)
 		const filePath = path.join(pLogger.destinationPath, fileName)
@@ -106,7 +106,7 @@ const logger = (theme: Themes, pLogger: PLogger, { label, description, body, exi
 		}
 
 		try {
-			fs.appendFileSync(filePath, `${headers.join(' ')}\n${textBody.join('\n')}\n`, { encoding: 'utf-8' })
+			fs.appendFileSync(filePath, `${headers.join(' ')}${textBody.length ? `\n${textBody.join('\n')}` : ''}\n`, { encoding: 'utf-8' })
 		} catch (error) {
 			throw new Error(`No fue posible registrar la entrada en el archivo '${filePath}': ${error.message}`)
 		}
