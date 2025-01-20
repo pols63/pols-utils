@@ -124,7 +124,7 @@ export class PLogger {
 	constructor(params?: PLoggerParams) {
 		this.destinationPath = params?.destinationPath
 		this.showIn = params?.showIn
-		this.fileName = params.fileName
+		this.fileName = params?.fileName
 	}
 
 	info(params: PLoggerLogParams) {
