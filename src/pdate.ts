@@ -218,7 +218,21 @@ export class PDate {
 	daysDifference(other: PDate) {
 		if (this.isInvalidDate) throw new Error(`Este objeto es un InvalidDate`)
 		if (other.isInvalidDate) throw new Error(`El objeto de comparación es un InvalidDate`)
-		return Math.ceil(((this.time ?? 0) - (other.time ?? 0)) / 1000 / 60 / 60 / 24)
+		const ref1 = this.clone().clearTime()
+		const ref2 = other.clone().clearTime()
+		return Math.ceil(((ref1.time ?? 0) - (ref2.time ?? 0)) / 1000 / 60 / 60 / 24)
+	}
+
+	minutesDifference(other: PDate) {
+		if (this.isInvalidDate) throw new Error(`Este objeto es un InvalidDate`)
+		if (other.isInvalidDate) throw new Error(`El objeto de comparación es un InvalidDate`)
+		const ref1 = this.clone()
+		ref1.second = 0
+		ref1.millisecond = 0
+		const ref2 = other.clone()
+		ref2.second = 0
+		ref2.millisecond = 0
+		return Math.ceil(((this.time ?? 0) - (other.time ?? 0)) / 1000 / 60)
 	}
 
 	toString(mask = '@y-@mm-@dd @hh:@ii:@ss.@lll', language: Languages = 'spanish') {
