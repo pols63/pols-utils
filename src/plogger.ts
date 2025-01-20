@@ -91,7 +91,7 @@ const logger = (theme: Themes, pLogger: PLogger, { label, description, body, exi
 	}
 
 	/* Mensaje en archivo */
-	if (check(theme, pLogger.showIn.file)) {
+	if (check(theme, pLogger.showIn?.file)) {
 		const fileName = pLogger.fileName?.() ?? `LOGS ${now.toString('@y-@mm-@dd')}.log`
 		if (!pLogger.destinationPath) throw new Error(`La propiedad 'destinationPath' es requerida si la entrada debe ir a un archivo`)
 		const filePath = path.join(pLogger.destinationPath, fileName)
