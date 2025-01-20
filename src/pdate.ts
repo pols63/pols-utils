@@ -232,7 +232,7 @@ export class PDate {
 		const ref2 = other.clone()
 		ref2.second = 0
 		ref2.millisecond = 0
-		return Math.ceil(((this.time ?? 0) - (other.time ?? 0)) / 1000 / 60)
+		return Math.ceil(((ref1.time ?? 0) - (ref2.time ?? 0)) / 1000 / 60)
 	}
 
 	toString(mask = '@y-@mm-@dd @hh:@ii:@ss.@lll', language: Languages = 'spanish') {
