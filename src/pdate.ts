@@ -214,7 +214,6 @@ export class PDate {
 	setTime(value?: string) {
 		if (value != null) {
 			const temp = new Date(`${this.toString('@y-@mm-@dd')} ${value}`)
-			if (isNaN(temp.getTime())) throw new Error("El valor no tiene un formato de hora válido.")
 			this.engine = temp
 		} else {
 			this.clearTime()
