@@ -15,7 +15,7 @@
 			"runtimeArgs": [
 				"run",
 				"test",
-				"test/logger.ts"
+				"test/fechas.ts"
 			]
 		}
 	]
