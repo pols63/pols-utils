@@ -1,5 +1,5 @@
 export class PBase64 {
-	type = 'application/octet-stream'
+	mimeType = 'application/octet-stream'
 	content?: string
 	padding = 0
 	get size() {
@@ -13,7 +13,7 @@ export class PBase64 {
 	constructor(value: string) {
 		const matchess = value.match(/^(data:(.*?);base64,)?((.*?)(=*))$/)
 		if (!matchess) return
-		this.type = matchess[2] ?? this.type
+		this.mimeType = matchess[2] ?? this.mimeType
 		this.content = matchess[3]
 		this.padding = matchess[5].length ?? this.padding
 	}
