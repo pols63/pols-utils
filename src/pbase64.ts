@@ -6,6 +6,9 @@ export class PBase64 {
 		if (!this.content) return
 		return this.content.length * 3 / 4 - this.padding
 	}
+	get isInvalid() {
+		return !this.content
+	}
 
 	constructor(value: string) {
 		const matchess = value.match(/^(data:(.*?);base64,)?((.*?)(=*))$/)
