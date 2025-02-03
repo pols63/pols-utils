@@ -17,4 +17,14 @@ export class PBase64 {
 		this.content = matchess[3]
 		this.padding = matchess[5].length ?? this.padding
 	}
+
+	toBuffer() {
+		if (this.isInvalid) throw new Error(`El contenido no corresponde a una cadena Base64`)
+		return Buffer.from(this.content, 'base64')
+	}
+
+	toString(encode: BufferEncoding = 'utf-8') {
+		if (this.isInvalid) return ''
+		return Buffer.from(this.content, 'base64').toString(encode)
+	}
 }
