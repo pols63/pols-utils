@@ -165,19 +165,19 @@ export const PUtils = {
 		},
 		clone: (value: unknown, formatElement?: (element: unknown, key: string | number) => unknown) => {
 			if (value != null) {
-				if (typeof value == 'object') {
+				if (value instanceof Array) {
+					const result: unknown[] = []
+					for (const [i, element] of value.entries()) {
+						const formattedElement = formatElement ? formatElement.bind(value)(element, i) : element
+						result.push(PUtils.JSON.clone(formattedElement, formatElement))
+					}
+					return result
+				} else if (typeof value == 'object') {
 					const result: URecord = {}
 					for (const key in value) {
 						const element = value[key]
 						const formattedElement = formatElement ? formatElement.bind(value)(element, key) : element
 						result[key] = PUtils.JSON.clone(formattedElement, formatElement)
-					}
-					return result
-				} else if (value instanceof Array) {
-					const result: unknown[] = []
-					for (const [i, element] of value.entries()) {
-						const formattedElement = formatElement ? formatElement.bind(value)(element, i) : element
-						result.push(PUtils.JSON.clone(formattedElement, formatElement))
 					}
 					return result
 				} else {

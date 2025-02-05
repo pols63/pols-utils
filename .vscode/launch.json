@@ -15,7 +15,7 @@
 			"runtimeArgs": [
 				"run",
 				"test",
-				"test/fechas.ts"
+				"test/stringify.ts"
 			]
 		}
 	]
