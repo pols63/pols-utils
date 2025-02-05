@@ -140,29 +140,36 @@ export const PUtils = {
 		},
 	},
 	JSON: {
-		stringify(value: unknown, space?: string) {
+		stringify(value: unknown, { space, formatElement }: {
+			space?: string
+			formatElement?: (element: unknown, key: string | number) => string | number | boolean | null | object
+		}) {
 			return JSON.stringify(value, function (key, value) {
-				if (this[key] instanceof Date) {
-					return PUtils.Date.format(this[key])
-				} else if (this[key] instanceof PDate) {
-					return this[key].toString()
+				const element = this[key]
+				if (element instanceof Date) {
+					return formatElement ? formatElement.bind(this)(element, key) : PUtils.Date.format(element)
+				} else if (element instanceof PDate) {
+					return formatElement ? formatElement.bind(this)(element, key) : element.toString
 				} else {
 					return value
 				}
 			}, space)
 		},
-		clone: (value: unknown, formatElement?: (element: unknown, key: string) => unknown) => {
+		clone: (value: unknown, formatElement?: (element: unknown, key: string | number) => unknown) => {
 			if (value != null) {
 				if (typeof value == 'object') {
 					const result: URecord = {}
 					for (const key in value) {
-						result[key] = PUtils.JSON.clone(value[key], formatElement)
+						const element = value[key]
+						const formattedElement = formatElement ? formatElement.bind(value)(element, key) : element
+						result[key] = PUtils.JSON.clone(formattedElement, formatElement)
 					}
 					return result
 				} else if (value instanceof Array) {
 					const result: unknown[] = []
-					for (const element of value) {
-						result.push(PUtils.JSON.clone(element, formatElement))
+					for (const [i, element] of value.entries()) {
+						const formattedElement = formatElement ? formatElement.bind(value)(element, i) : element
+						result.push(PUtils.JSON.clone(formattedElement, formatElement))
 					}
 					return result
 				} else {
