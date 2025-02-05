@@ -147,19 +147,19 @@ export const PUtils = {
 			formatElement?: (rawElement: unknown, formattedElement: JSONStringifyValidValues, key: string | number) => JSONStringifyValidValues
 		} = {}) {
 			return JSON.stringify(value, function (key, value) {
-				const element = this[key]
-				const isDate = element instanceof Date
-				const isPDate = element instanceof PDate
+				const rawElement = this[key]
+				const isDate = rawElement instanceof Date
+				const isPDate = rawElement instanceof PDate
 				if (isDate || isPDate) {
 					let formattedElement: string
 					if (isDate) {
-						formattedElement = PUtils.Date.format(element)
+						formattedElement = PUtils.Date.format(rawElement)
 					} else if (isPDate) {
-						formattedElement = element.toString()
+						formattedElement = rawElement.toString()
 					}
-					return formatElement ? formatElement.bind(this)(element, formattedElement, key) : formattedElement
+					return formatElement ? formatElement.bind(this)(rawElement, formattedElement, key) : formattedElement
 				} else {
-					return value
+					return formatElement ? formatElement.bind(this)(rawElement, value, key) : value
 				}
 			}, space)
 		},
