@@ -20,6 +20,8 @@ export type ToMatch = {
 	in?: number[],
 }
 
+export type JSONStringifyValidValues = string | number | boolean | null | object
+
 export const PUtils = {
 	String: {
 		ucWords(value: string) {
@@ -142,14 +144,20 @@ export const PUtils = {
 	JSON: {
 		stringify(value: unknown, { space, formatElement }: {
 			space?: string
-			formatElement?: (element: unknown, key: string | number) => string | number | boolean | null | object
+			formatElement?: (rawElement: unknown, formattedElement: JSONStringifyValidValues, key: string | number) => JSONStringifyValidValues
 		} = {}) {
 			return JSON.stringify(value, function (key, value) {
 				const element = this[key]
-				if (element instanceof Date) {
-					return formatElement ? formatElement.bind(this)(element, key) : PUtils.Date.format(element)
-				} else if (element instanceof PDate) {
-					return formatElement ? formatElement.bind(this)(element, key) : element.toString
+				const isDate = element instanceof Date
+				const isPDate = element instanceof PDate
+				if (isDate || isPDate) {
+					let formattedElement: string
+					if (isDate) {
+						formattedElement = PUtils.Date.format(element)
+					} else if (isPDate) {
+						formattedElement = element.toString()
+					}
+					return formatElement ? formatElement.bind(this)(element, formattedElement, key) : formattedElement
 				} else {
 					return value
 				}
