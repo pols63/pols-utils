@@ -143,7 +143,7 @@ export const PUtils = {
 		stringify(value: unknown, { space, formatElement }: {
 			space?: string
 			formatElement?: (element: unknown, key: string | number) => string | number | boolean | null | object
-		}) {
+		} = {}) {
 			return JSON.stringify(value, function (key, value) {
 				const element = this[key]
 				if (element instanceof Date) {
