@@ -151,6 +151,27 @@ export const PUtils = {
 				}
 			}, space)
 		},
+		clone: (value: unknown, formatElement?: (element: unknown, key: string) => unknown) => {
+			if (value != null) {
+				if (typeof value == 'object') {
+					const result: URecord = {}
+					for (const key in value) {
+						result[key] = PUtils.JSON.clone(value[key], formatElement)
+					}
+					return result
+				} else if (value instanceof Array) {
+					const result: unknown[] = []
+					for (const element of value) {
+						result.push(PUtils.JSON.clone(element, formatElement))
+					}
+					return result
+				} else {
+					return formatElement ? formatElement(value, '') : value
+				}
+			} else {
+				return formatElement ? formatElement(value, '') : value
+			}
+		}
 	},
 	Array: {
 		swapItems(array: unknown[], oldIndex: number, newIndex: number) {
