@@ -163,28 +163,28 @@ export const PUtils = {
 				}
 			}, space)
 		},
-		clone: (value: unknown, formatElement?: (element: unknown, key: string | number) => unknown) => {
-			if (value != null) {
-				if (value instanceof Array) {
+		clone: (value: unknown, formatElement?: (element: unknown) => unknown) => {
+			const formattedValue = formatElement ? formatElement(value) : value
+			if (formattedValue != null) {
+				if (formattedValue instanceof Array) {
 					const result: unknown[] = []
-					for (const [i, element] of value.entries()) {
-						const formattedElement = formatElement ? formatElement.bind(value)(element, i) : element
-						result.push(PUtils.JSON.clone(formattedElement, formatElement))
+					for (const element of formattedValue) {
+						result.push(PUtils.JSON.clone(element, formatElement))
 					}
 					return result
-				} else if (typeof value == 'object') {
+				} else if (formattedValue instanceof Date) {
+					return new Date(formattedValue)
+				} else if (typeof formattedValue == 'object') {
 					const result: URecord = {}
-					for (const key in value) {
-						const element = value[key]
-						const formattedElement = formatElement ? formatElement.bind(value)(element, key) : element
-						result[key] = PUtils.JSON.clone(formattedElement, formatElement)
+					for (const key in formattedValue) {
+						result[key] = PUtils.JSON.clone(value[key], formatElement)
 					}
 					return result
 				} else {
-					return formatElement ? formatElement(value, '') : value
+					return formattedValue
 				}
 			} else {
-				return formatElement ? formatElement(value, '') : value
+				return formattedValue
 			}
 		}
 	},
