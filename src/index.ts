@@ -1,10 +1,8 @@
 import fs from 'fs'
 import stream from 'stream'
-import { Languages, URecord } from './types'
-import { PDate } from './pdate'
+import { PLanguages, PRecord } from './constants'
 import { date_Format, dayName, left, monthName, padLeft, padRight, right } from './base'
 
-export { PDate }
 export { PBase64 } from './pbase64'
 
 export type IterationFunction<T> = (element: T, index: number) => boolean
@@ -79,13 +77,13 @@ export const PUtils = {
 		}
 	},
 	Object: {
-		getValue(target: URecord, path: string, stringToObject = true): unknown {
+		getValue(target: PRecord, path: string, stringToObject = true): unknown {
 			const arr = path.split(/\./)
 			let reference: unknown = target
 			if (!reference) return
 			if (reference instanceof Array) reference = reference[0]
 			for (let i = 0; i < arr.length; i++) {
-				reference = (reference as URecord)[arr[i]]
+				reference = (reference as PRecord)[arr[i]]
 				if (reference instanceof Array && i < arr.length - 1) {
 					reference = reference[0]
 				} else if (typeof reference == 'string' && i < arr.length - 1 && stringToObject) {
@@ -98,25 +96,25 @@ export const PUtils = {
 			}
 			return reference
 		},
-		setValue(target: URecord, path: string, value: unknown): void {
+		setValue(target: PRecord, path: string, value: unknown): void {
 			const arr = path.split(/\./)
 			let reference: unknown = target
 			if (!reference) return
 			for (let i = 0; i < arr.length - 1; i++) {
-				if ((reference as URecord)[arr[i]] === undefined && i < arr.length - 1) {
-					(reference as URecord)[arr[i]] = {}
+				if ((reference as PRecord)[arr[i]] === undefined && i < arr.length - 1) {
+					(reference as PRecord)[arr[i]] = {}
 				}
-				reference = (reference as URecord)[arr[i]]
+				reference = (reference as PRecord)[arr[i]]
 				if (reference instanceof Array) reference = reference[0]
 				if (!reference) return
 			}
 			if (value !== undefined) {
-				(reference as URecord)[arr[arr.length - 1]] = value
+				(reference as PRecord)[arr[arr.length - 1]] = value
 			} else {
-				delete (reference as URecord)[arr[arr.length - 1]]
+				delete (reference as PRecord)[arr[arr.length - 1]]
 			}
 		},
-		objectToUrlParameters: (obj: URecord) => {
+		objectToUrlParameters: (obj: PRecord) => {
 			return Object.keys(obj).map(key => {
 				const value = obj[key]
 				let valueToEncode: string | number | boolean = ''
@@ -128,11 +126,11 @@ export const PUtils = {
 				return `${encodeURIComponent(key)}=${obj[key] == null ? '' : encodeURIComponent(valueToEncode)}`
 			}).join("&")
 		},
-		urlParametersToObject: (value: string): URecord => {
+		urlParametersToObject: (value: string): PRecord => {
 			const query = value.match(/^\??(.*)$/)?.[1]
 			if (!query) return {}
 			const parts = query.split('&')
-			const result: URecord = {}
+			const result: PRecord = {}
 			for (const part of parts) {
 				const subparts = part.split('=')
 				result[subparts[0]] = subparts[1] ?? null
@@ -141,27 +139,6 @@ export const PUtils = {
 		},
 	},
 	JSON: {
-		stringify(value: unknown, { space, formatElement }: {
-			space?: string
-			formatElement?: (rawElement: unknown, formattedElement: JSONStringifyValidValues, key: string | number) => JSONStringifyValidValues
-		} = {}) {
-			return JSON.stringify(value, function (key, value) {
-				const rawElement = this[key]
-				const isDate = rawElement instanceof Date
-				const isPDate = rawElement instanceof PDate
-				if (isDate || isPDate) {
-					let formattedElement: string
-					if (isDate) {
-						formattedElement = PUtils.Date.format(rawElement)
-					} else if (isPDate) {
-						formattedElement = rawElement.toString()
-					}
-					return formatElement ? formatElement.bind(this)(rawElement, formattedElement, key) : formattedElement
-				} else {
-					return formatElement ? formatElement.bind(this)(rawElement, value, key) : value
-				}
-			}, space)
-		},
 		clone: (value: unknown, formatElement?: (element: unknown) => unknown) => {
 			const formattedValue = formatElement ? formatElement(value) : value
 			if (formattedValue != null) {
@@ -174,7 +151,7 @@ export const PUtils = {
 				} else if (formattedValue instanceof Date) {
 					return new Date(formattedValue)
 				} else if (typeof formattedValue == 'object') {
-					const result: URecord = {}
+					const result: PRecord = {}
 					for (const key in formattedValue) {
 						result[key] = PUtils.JSON.clone(value[key], formatElement)
 					}
@@ -223,7 +200,7 @@ export const PUtils = {
 				if (typeof query == 'object') {
 					if (typeof element != 'object') continue
 					for (const p in query) {
-						const valueOfElement = PUtils.Object.getValue((element as unknown) as URecord, p)
+						const valueOfElement = PUtils.Object.getValue((element as unknown) as PRecord, p)
 						const queryProperty = query[p]
 						if (queryProperty == null && valueOfElement == null) continue
 						if (queryProperty instanceof RegExp && typeof valueOfElement == 'string' && valueOfElement.match(queryProperty)) continue
@@ -254,7 +231,7 @@ export const PUtils = {
 				if (typeof query == 'object') {
 					if (typeof element != 'object') continue
 					for (const p in query) {
-						const valueOfElement = PUtils.Object.getValue((element as unknown) as URecord, p)
+						const valueOfElement = PUtils.Object.getValue((element as unknown) as PRecord, p)
 						const queryProperty = query[p]
 						if (queryProperty == null && valueOfElement == null) continue
 						if (queryProperty instanceof RegExp && typeof valueOfElement == 'string' && valueOfElement.match(queryProperty)) continue
@@ -277,7 +254,7 @@ export const PUtils = {
 				if (typeof query == 'object') {
 					if (typeof element != 'object') continue
 					for (const p in query) {
-						if (PUtils.Object.getValue((element as unknown) as URecord, p) !== query[p]) {
+						if (PUtils.Object.getValue((element as unknown) as PRecord, p) !== query[p]) {
 							success = false
 							break
 						}
@@ -298,7 +275,7 @@ export const PUtils = {
 				if (typeof query == 'object') {
 					if (typeof element != 'object') continue
 					for (const p in query) {
-						if (PUtils.Object.getValue((element as unknown) as URecord, p) !== query[p]) {
+						if (PUtils.Object.getValue((element as unknown) as PRecord, p) !== query[p]) {
 							success = false
 							break
 						}
@@ -315,7 +292,7 @@ export const PUtils = {
 			return results
 		},
 		groupBy<T = never, K = never>(array: K[], setterPropertyName: (element: K, index?: number) => string | number | symbol, transform?: (element: K) => T) {
-			const results: URecord<([T] extends [never] ? K : T)[]> = {}
+			const results: PRecord<([T] extends [never] ? K : T)[]> = {}
 			for (const [i, element] of array.entries()) {
 				const propertyName = setterPropertyName(element, i)
 				let reference = results[propertyName]
@@ -353,7 +330,7 @@ export const PUtils = {
 			return chunks
 		},
 		toIndex<T, K = never>(array: T[], setterPropertyName: (element: T, index?: number) => string | number | symbol, formatElement?: (element: T, index?: number) => K) {
-			const result: URecord<[K] extends [never] ? T : K> = {}
+			const result: PRecord<[K] extends [never] ? T : K> = {}
 			for (const [i, element] of array?.entries() ?? []) {
 				result[setterPropertyName(element, i)] = (formatElement?.(element, i) ?? element) as any
 			}
@@ -364,7 +341,7 @@ export const PUtils = {
 	Date: {
 		monthName,
 		dayName,
-		format(date: Date, mask = '@y-@mm-@dd @hh:@ii:@ss.@lll', language: Languages = 'spanish'): string {
+		format(date: Date, mask = '@y-@mm-@dd @hh:@ii:@ss.@lll', language = PLanguages.SPANISH): string {
 			return date_Format(date, mask, language)
 		},
 		getWeek(date: Date) {
@@ -819,12 +796,12 @@ export const PUtils = {
 	},
 	getType: (obj: unknown) => {
 		const type = toString.call(obj).match(/\s([a-zA-Z0-9]+)/)?.[1].replace(/HTML[a-zA-Z]*Element/, "HTMLElement")
-		return (['Object', 'Array'].includes(type ?? '') ? (obj as URecord).constructor.name : type) ?? null
+		return (['Object', 'Array'].includes(type ?? '') ? (obj as PRecord).constructor.name : type) ?? null
 	},
-	formula: (toEval: string, parameters: URecord) => {
+	formula: (toEval: string, parameters: PRecord) => {
 		if (parameters) {
 			parameters = (() => {
-				const neoParameters: URecord = {}
+				const neoParameters: PRecord = {}
 				for (const propertyName in parameters) {
 					let value = parameters[propertyName]
 					switch (typeof value) {
@@ -895,7 +872,7 @@ export const PUtils = {
 		} else if (source == null || typeof source != 'object') {
 			return source
 		} else if (typeof source == 'object') {
-			const cloned: URecord = {}
+			const cloned: PRecord = {}
 			for (const property in source) {
 				cloned[property] = PUtils.clone(source[property])
 			}

@@ -1,11 +1,16 @@
-import { Languages } from "./types"
+export type PRecord<T = unknown> = Record<string | number | symbol, T>
 
-export const DAYS: Record<Languages, string[]> = {
-	spanish: ['lunes', 'martes', 'mierrcoles', 'jueves', 'viernes', 'sabado', 'domingo'],
-	english: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+export enum PLanguages {
+	SPANISH = 'SPANISH',
+	ENSHIGL = 'ENGLISH',
 }
 
-export const MONTHS: Record<Languages, string[]> = {
-	spanish: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
-	english: ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'],
+export const DAYS: Record<PLanguages, string[]> = {
+	SPANISH: ['lunes', 'martes', 'mierrcoles', 'jueves', 'viernes', 'sabado', 'domingo'],
+	ENGLISH: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+}
+
+export const MONTHS: Record<PLanguages, string[]> = {
+	SPANISH: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
+	ENGLISH: ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'],
 }

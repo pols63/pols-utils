@@ -1,13 +1,13 @@
 import { DAYS, MONTHS } from "./constants"
-import { Languages } from "./types"
+import { PLanguages } from "./constants"
 
-export const monthName = (monthNumber: number, shortName = false, language: Languages = 'spanish'): string => {
+export const monthName = (monthNumber: number, shortName = false, language = PLanguages.SPANISH): string => {
 	const monthName = MONTHS[language]?.[Math.abs(monthNumber - 1) % 12]
 	if (!monthName) return ''
 	return shortName ? monthName.substring(0, 3) : monthName
 }
 
-export const dayName = (dayNumber: number, shortName = false, language: Languages = 'spanish'): string => {
+export const dayName = (dayNumber: number, shortName = false, language = PLanguages.SPANISH): string => {
 	const dayName = DAYS[language]?.[Math.abs(dayNumber) % 7]
 	if (!dayName) return ''
 	return shortName ? dayName.substring(0, 3) : dayName
@@ -46,7 +46,7 @@ export const date_getWeek = (date: Date): number => {
 	return Math.ceil(((date.getTime() - onejan.getTime()) / 86400000 + onejan.getDay() + 1) / 7)
 }
 
-export const date_Format = (date: Date, mask = '@y-@mm-@dd @hh:@ii:@ss.@lll', language: Languages = 'spanish'): string => {
+export const date_Format = (date: Date, mask = '@y-@mm-@dd @hh:@ii:@ss.@lll', language = PLanguages.SPANISH): string => {
 	const hours = date.getHours()
 	const hours12 = (hours % 12) || 12
 	const pm = hours >= 12
