@@ -5,9 +5,9 @@ import { date_Format, dayName, left, monthName, padLeft, padRight, right } from 
 
 export { PBase64 } from './pbase64'
 
-export type IterationFunction<T> = (element: T, index: number) => boolean
+export type PIterationFunction<T> = (element: T, index: number) => boolean
 
-export type ToMatch = {
+export type PToMatch = {
 	ne?: number,
 	eq?: number,
 	lt?: number,
@@ -16,8 +16,6 @@ export type ToMatch = {
 	gte?: number,
 	in?: number[],
 }
-
-export type JSONStringifyValidValues = string | number | boolean | null | object
 
 export const PUtils = {
 	String: {
@@ -192,7 +190,7 @@ export const PUtils = {
 			array.splice(oldIndex, 1)
 			array.splice(newIndex, 0, el1)
 		},
-		queryOne<T>(array: T[], query: (Partial<T> & Record<string, unknown>) | IterationFunction<T>, resultReturn?: (element: T | null, i: number) => T) {
+		queryOne<T>(array: T[], query: (Partial<T> & Record<string, unknown>) | PIterationFunction<T>, resultReturn?: (element: T | null, i: number) => T) {
 			let result: T | null = null
 			let index: number = -1
 			for (const [i, element] of array.entries()) {
@@ -224,7 +222,7 @@ export const PUtils = {
 				return result
 			}
 		},
-		query<T>(array: T[], query: Partial<T> | IterationFunction<T>) {
+		query<T>(array: T[], query: Partial<T> | PIterationFunction<T>) {
 			const results: T[] = []
 			for (const [i, element] of array.entries()) {
 				let success = true
@@ -247,7 +245,7 @@ export const PUtils = {
 			}
 			return results
 		},
-		extractOne<T>(array: T[], query: Partial<T> | IterationFunction<T>) {
+		extractOne<T>(array: T[], query: Partial<T> | PIterationFunction<T>) {
 			if (array == null) return null
 			for (const [i, element] of array.entries()) {
 				let success = true
@@ -266,7 +264,7 @@ export const PUtils = {
 			}
 			return null
 		},
-		extract<T>(array: T[], query: Partial<T> | IterationFunction<T>) {
+		extract<T>(array: T[], query: Partial<T> | PIterationFunction<T>) {
 			let i = 0
 			const results: T[] = []
 			while (i < array.length) {
@@ -545,12 +543,12 @@ export const PUtils = {
 			}).join(' ').trim() + (decimals ? ` CON ${parts.decimal}/${PUtils.String.padRight('1', decimals + 1)}` : '')
 		},
 		/* Compara el número con los valores pasados en params en función al nombre del parámetro */
-		compare(value: number, params: ToMatch | string[] | string) {
+		compare(value: number, params: PToMatch | string[] | string) {
 			if (isNaN(value)) return false
 			if (typeof params == 'string') params = params.split(';')
 
 			if (params instanceof Array) {
-				const newParams: ToMatch = {}
+				const newParams: PToMatch = {}
 				const expression = /^([<>]=?|=)(-?[0-9]*\.?[0-9]+)$/
 				for (const [i, param] of params.entries()) {
 					if (typeof param !== 'string') throw new Error(`El elemento ${i} no es de tipo 'string'`)
@@ -582,7 +580,7 @@ export const PUtils = {
 
 			const properties: string[] = Object.keys(params)
 			for (const property of properties) {
-				const param = params[property as keyof ToMatch]
+				const param = params[property as keyof PToMatch]
 				switch (property) {
 					case 'lt':
 					case 'lte':
