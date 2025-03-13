@@ -74,7 +74,6 @@ export const date_Format = (date: Date, mask = '@y-@mm-@dd @hh:@ii:@ss.@lll', la
 		.replace(/@lll/g, padLeft(date.getMilliseconds(), 3))
 		.replace(/@ll/g, padLeft(date.getMilliseconds(), 2))
 		.replace(/@l/g, date.getMilliseconds().toString())
-		.replace(/@ww/g, padLeft(date_getWeek(date), 2))
 		.replace(/@w/g, date_getWeek(date).toString())
 		.replace(/@eee/g, pm ? 'p.m.' : 'a.m.')
 		.replace(/@ee/g, pm ? 'pm' : 'am')
