@@ -17,51 +17,14 @@ export type PToMatch = {
 	in?: number[],
 }
 
+import * as PUtilsString from './string'
+
+export { PUtilsString }
+
+/**
+ * Collection of utils methods.
+ */
 export const PUtils = {
-	String: {
-		ucWords(value: string) {
-			return value.replace(/(\s|^)./g, (letter: string) => letter.toUpperCase())
-		},
-		highlight(value: string, tag = 'b') {
-			return value.replace(new RegExp(`('|")(.+?)\\1`, 'g'), (a: string, b: string, c: string) => `<${tag}>${c}</${tag}>`)
-		},
-		capitalize(value: string) {
-			return value.toLowerCase().replace(/(\s|^)[a-záéíóúñ]/g, (c) => c.toUpperCase())
-		},
-		withoutAccentMark(value?: string) {
-			const accentMarks: Record<string, string> = { Á: 'A', É: 'E', Í: 'I', Ó: 'O', Ú: 'U', á: 'a', é: 'e', í: 'i', ó: 'o', ú: 'u' }
-			return value?.replace(/á|é|í|ó|ú|Á|É|Í|Ó|Ú/g, (v) => accentMarks[v])
-		},
-		smartMatch(subject: string, match: string) {
-			const accentMarks: Record<string, string> = { á: '(a|á)', é: '(e|é)', í: '(i|í)', ó: '(o|ó)', ú: '(u|ú)', a: '(a|á)', e: '(e|é)', i: '(i|í)', o: '(o|ó)', u: '(u|ú)' }
-			match = match.trim().toLowerCase()
-				.replace(/\.|\?|\+|\*|\(|\)|\{|\}|\[|\]/g, ' ')
-				.replace(/á|é|í|ó|ú|a|e|i|o|u/g, (v) => accentMarks[v])
-				.replace(/\s+/g, ' ')
-				.replace(/\s/g, '.*?')
-			return subject.match(new RegExp(match, 'gi'))
-		},
-		compareWithoutAccentMark(value1: string, value2: string) {
-			return this.withoutAccentMark(value1) === this.withoutAccentMark(value2)
-		},
-		toReadableStream(value: string, coding: 'utf8' | 'base64' = 'utf8') {
-			const readableStream = new stream.Readable
-			switch (coding) {
-				case 'utf8':
-					readableStream.push(value)
-					break
-				case 'base64':
-					readableStream.push(Buffer.from(value, 'base64'))
-					break
-			}
-			readableStream.push(null)
-			return readableStream
-		},
-		left,
-		right,
-		padLeft,
-		padRight
-	},
 	Files: {
 		existsDirectory: (filePath: string): boolean => {
 			if (!fs.existsSync(filePath)) return false
@@ -460,11 +423,11 @@ export const PUtils = {
 			}
 			/* Construye el número a presentar */
 			if (exponentialSign === '-') {
-				number = PUtils.String.padLeft(number, exponentialNumber + 1)
+				number = PUtilsString.padLeft(number, exponentialNumber + 1)
 				const index = number.length - exponentialNumber
 				number = number.substring(0, index) + '.' + number.substring(index)
 			} else {
-				number += PUtils.String.padRight('', exponentialNumber)
+				number += PUtilsString.padRight('', exponentialNumber)
 			}
 			return `${sign}${number}`
 		},
@@ -502,7 +465,7 @@ export const PUtils = {
 			/* Separa la parte decimal */
 			const arr1 = text.split('.')
 			const parts = {
-				integer: PUtils.String.padLeft(arr1[0], Math.ceil(arr1[0].length / 3) * 3),
+				integer: PUtilsString.padLeft(arr1[0], Math.ceil(arr1[0].length / 3) * 3),
 				decimal: arr1[1]
 			}
 
@@ -540,7 +503,7 @@ export const PUtils = {
 					separator = separator.replace('ÓN', 'ONES')
 				}
 				return `${r} ${separator}`
-			}).join(' ').trim() + (decimals ? ` CON ${parts.decimal}/${PUtils.String.padRight('1', decimals + 1)}` : '')
+			}).join(' ').trim() + (decimals ? ` CON ${parts.decimal}/${PUtilsString.padRight('1', decimals + 1)}` : '')
 		},
 		/* Compara el número con los valores pasados en params en función al nombre del parámetro */
 		compare(value: number, params: PToMatch | string[] | string) {
@@ -683,21 +646,21 @@ export const PUtils = {
 			if (value < 0) mask = mask.replace(/^/g, '-')
 
 			return mask
-				.replace(/@yy/g, PUtils.String.padLeft(parts.years, 2))
+				.replace(/@yy/g, PUtilsString.padLeft(parts.years, 2))
 				.replace(/@y/g, parts.years.toString())
-				.replace(/@mm/g, PUtils.String.padLeft(parts.months, 2))
+				.replace(/@mm/g, PUtilsString.padLeft(parts.months, 2))
 				.replace(/@m/g, parts.months.toString())
-				.replace(/@ww/g, PUtils.String.padLeft(parts.weeks, 2))
+				.replace(/@ww/g, PUtilsString.padLeft(parts.weeks, 2))
 				.replace(/@w/g, parts.weeks.toString())
-				.replace(/@dd/g, PUtils.String.padLeft(parts.days, 2))
+				.replace(/@dd/g, PUtilsString.padLeft(parts.days, 2))
 				.replace(/@d/g, parts.days.toString())
-				.replace(/@hh/g, PUtils.String.padLeft(parts.hours, 2))
+				.replace(/@hh/g, PUtilsString.padLeft(parts.hours, 2))
 				.replace(/@h/g, parts.hours.toString())
-				.replace(/@ii/g, PUtils.String.padLeft(parts.minutes, 2))
+				.replace(/@ii/g, PUtilsString.padLeft(parts.minutes, 2))
 				.replace(/@i/g, parts.minutes.toString())
-				.replace(/@ss/g, PUtils.String.padLeft(parts.seconds, 2))
+				.replace(/@ss/g, PUtilsString.padLeft(parts.seconds, 2))
 				.replace(/@s/g, parts.seconds.toString())
-				.replace(/@ll/g, PUtils.String.padLeft(parts.miliseconds, 2))
+				.replace(/@ll/g, PUtilsString.padLeft(parts.miliseconds, 2))
 				.replace(/@l/g, parts.miliseconds.toString())
 		},
 		isInteger(value: number) {

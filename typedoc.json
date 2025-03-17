@@ -1,0 +1,20 @@
+{
+	"entryPoints": [
+		"src/index.ts"
+	],
+	"out": "docs",
+	"tsconfig": "tsconfig.json",
+	"includeVersion": true,
+	"readme": "README.md",
+	"excludePrivate": true,
+	"excludeProtected": true,
+	"excludeExternals": true,
+	"excludeTags": [
+		"@returns"
+	],
+	"sort": [
+		"kind",
+		"instance-first",
+		"alphabetical-ignoring-documents"
+	]
+}
