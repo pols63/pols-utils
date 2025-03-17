@@ -39,4 +39,30 @@ export const toReadableStream = (value: string, coding: 'utf8' | 'base64' = 'utf
 	return readableStream
 }
 
-export { left, right, padLeft, padRight } from './base'
+export const left = (value: string | number, length: number): string => {
+	const text = typeof value == 'number' ? value.toString() : value
+	return text.substring(0, length)
+}
+
+export const right = (value: string | number, length: number): string => {
+	const text = typeof value == 'number' ? value.toString() : value
+	return text.substring(text.length - length)
+}
+
+export const padLeft = (value: string | number, length: number, text = '0'): string => {
+	if (length < 0) throw new Error(`'length' debe ser positivo`)
+	if (Math.ceil(length) != length) throw new Error(`'length' debe ser un número entero`)
+	const target = typeof value == 'number' ? value.toString() : value
+	if (target.length > length || text == '') return target
+	const chain = Array(length + 1).join(text)
+	return right(`${chain}${target}`, length)
+}
+
+export const padRight = (value: string | number, length: number, text = '0'): string => {
+	if (length < 0) throw new Error(`'length' debe ser positivo`)
+	if (Math.ceil(length) != length) throw new Error(`'length' debe ser un número entero`)
+	const target = typeof value == 'number' ? value.toString() : value
+	if (target.length > length || text == '') return target
+	const chain = Array(length + 1).join(text)
+	return left(`${target}${chain}`, length)
+}

@@ -1,5 +1,19 @@
-import { DAYS, MONTHS } from "./constants"
-import { PLanguages } from "./constants"
+import { padLeft } from "./string"
+
+export enum PLanguages {
+	SPANISH = 'SPANISH',
+	ENGLISH = 'ENGLISH',
+}
+
+export const DAYS: Record<PLanguages, string[]> = {
+	SPANISH: ['lunes', 'martes', 'mierrcoles', 'jueves', 'viernes', 'sabado', 'domingo'],
+	ENGLISH: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+}
+
+export const MONTHS: Record<PLanguages, string[]> = {
+	SPANISH: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
+	ENGLISH: ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'],
+}
 
 export const monthName = (monthNumber: number, shortName = false, language = PLanguages.SPANISH): string => {
 	const monthName = MONTHS[language]?.[Math.abs(monthNumber - 1) % 12]
@@ -13,40 +27,16 @@ export const dayName = (dayNumber: number, shortName = false, language = PLangua
 	return shortName ? dayName.substring(0, 3) : dayName
 }
 
-export const left = (value: string | number, length: number): string => {
-	const text = typeof value == 'number' ? value.toString() : value
-	return text.substring(0, length)
-}
-
-export const right = (value: string | number, length: number): string => {
-	const text = typeof value == 'number' ? value.toString() : value
-	return text.substring(text.length - length)
-}
-
-export const padLeft = (value: string | number, length: number, text = '0'): string => {
-	if (length < 0) throw new Error(`'length' debe ser positivo`)
-	if (Math.ceil(length) != length) throw new Error(`'length' debe ser un número entero`)
-	const target = typeof value == 'number' ? value.toString() : value
-	if (target.length > length || text == '') return target
-	const chain = Array(length + 1).join(text)
-	return right(`${chain}${target}`, length)
-}
-
-export const padRight = (value: string | number, length: number, text = '0'): string => {
-	if (length < 0) throw new Error(`'length' debe ser positivo`)
-	if (Math.ceil(length) != length) throw new Error(`'length' debe ser un número entero`)
-	const target = typeof value == 'number' ? value.toString() : value
-	if (target.length > length || text == '') return target
-	const chain = Array(length + 1).join(text)
-	return left(`${target}${chain}`, length)
-}
-
-export const date_getWeek = (date: Date): number => {
+export const getWeek = (date: Date): number => {
 	const onejan = new Date(date.getFullYear(), 0, 1)
 	return Math.ceil(((date.getTime() - onejan.getTime()) / 86400000 + onejan.getDay() + 1) / 7)
 }
 
-export const date_Format = (date: Date, mask = '@y-@mm-@dd @hh:@ii:@ss.@lll', language = PLanguages.SPANISH): string => {
+export const format: {
+	(date: Date, mask?: string, language?: PLanguages): string
+	language?: PLanguages.SPANISH
+} = (date: Date, mask = '@y-@mm-@dd @hh:@ii:@ss.@lll', language): string => {
+	if (!language) language = format.language
 	const hours = date.getHours()
 	const hours12 = (hours % 12) || 12
 	const pm = hours >= 12
@@ -74,7 +64,7 @@ export const date_Format = (date: Date, mask = '@y-@mm-@dd @hh:@ii:@ss.@lll', la
 		.replace(/@lll/g, padLeft(date.getMilliseconds(), 3))
 		.replace(/@ll/g, padLeft(date.getMilliseconds(), 2))
 		.replace(/@l/g, date.getMilliseconds().toString())
-		.replace(/@w/g, date_getWeek(date).toString())
+		.replace(/@w/g, getWeek(date).toString())
 		.replace(/@eee/g, pm ? 'p.m.' : 'a.m.')
 		.replace(/@ee/g, pm ? 'pm' : 'am')
 		.replace(/@e/g, pm ? 'p' : 'a')
@@ -82,3 +72,4 @@ export const date_Format = (date: Date, mask = '@y-@mm-@dd @hh:@ii:@ss.@lll', la
 		.replace(/@EE/g, pm ? 'PM' : 'AM')
 		.replace(/@E/g, pm ? 'P' : 'A')
 }
+format.language = PLanguages.SPANISH
