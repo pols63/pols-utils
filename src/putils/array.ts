@@ -59,9 +59,9 @@ export const moveItem = (array: unknown[], originIndex: number, destinationIndex
 }
 
 /**
- * It is used to compare every elements of an array. It can be used of two ways:
- * #### Object comparison 
- * Is useful with object arrays. Each property of the logical selector will be compare with every element of the target array. If values match, return true.
+ * It is used to compare every elements in the array. It can be used of two ways:
+ * #### 1. Object comparison 
+ * Is useful with object arrays. Each property of the logical selector will be compare with every element of the target array at same properties. If their values matches, return true.
  * ```javascript
  * const myarray = [
  *     { prop1: 'oneA', prop2: 'twoA', prop3: 'threeA' },
@@ -71,19 +71,39 @@ export const moveItem = (array: unknown[], originIndex: number, destinationIndex
  * console.log(PUtilsArray.query(myarray, { prop2: 'twoB' })) // [{ prop1: 'oneB', prop2: 'twoB', prop3: 'threeB' }]
  * console.log(PUtilsArray.query(myarray, { 'prop3.prop32': 'threeCB' })) // [{ prop1: 'oneC', prop2: 'twoC', prop3: { prop31: 'threeCA', prop32: 'threeCB' } }]
  * ```
+ * #### 2. Evaluate function 
+ * In this case, it must be a function to execute for each element in the array. It should return `true` if the element must be selected.
+ * ```javascript
+ * const myarray = [
+ *     { prop1: 'oneA', prop2: 'twoA', prop3: 'threeA' },
+ *     { prop1: 'oneB', prop2: 'twoB', prop3: 'threeB' },
+ *     { prop1: 'oneC', prop2: 'twoC', prop3: { prop31: 'threeCA', prop32: 'threeCB' } },
+ * ]
+ * console.log(PUtilsArray.query(myarray, element => element.prop2 == 'twoB')) // [{ prop1: 'oneB', prop2: 'twoB', prop3: 'threeB' }]
+ * console.log(PUtilsArray.query(myarray, element => element.prop3?.prop32 == 'threeCB' )) // [{ prop1: 'oneC', prop2: 'twoC', prop3: { prop31: 'threeCA', prop32: 'threeCB' } }]
+ * ```
  */
 export type PLogicalSelector<T> = (Partial<T> & Record<string, unknown>) | ((element: T, index: number) => boolean)
 
-export const queryOne = <T>(array: T[], query: PLogicalSelector<T>, resultReturn?: (element: T | null, i: number) => T) => {
-	let result: T | null = null
-	let index: number = -1
+/**
+ * Get the first element of an array that pass the logical selector.
+ * @param array Target array.
+ * @param logicalSelector Logical selector.
+ * @param transform A function that transforms the selected element, if provided.
+ * @returns The selected element.
+ */
+export const queryOne = <T, K = T>(array: T[], logicalSelector: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K | undefined => {
+	if (array == null || !array.length) return
+
+	let result: T
+	let index = -1
 	for (const [i, element] of array.entries()) {
 		let success = true
-		if (typeof query == 'object') {
+		if (typeof logicalSelector == 'object') {
 			if (typeof element != 'object') continue
-			for (const p in query) {
+			for (const p in logicalSelector) {
 				const valueOfElement = getValue((element as unknown) as PRecord, p)
-				const queryProperty = query[p]
+				const queryProperty = logicalSelector[p]
 				if (queryProperty == null && valueOfElement == null) continue
 				if (queryProperty instanceof RegExp && typeof valueOfElement == 'string' && valueOfElement.match(queryProperty)) continue
 				if (valueOfElement !== queryProperty) {
@@ -92,7 +112,7 @@ export const queryOne = <T>(array: T[], query: PLogicalSelector<T>, resultReturn
 				}
 			}
 		} else {
-			success = !!query(element, i)
+			success = !!logicalSelector(element, i)
 		}
 		if (success) {
 			result = element
@@ -100,14 +120,24 @@ export const queryOne = <T>(array: T[], query: PLogicalSelector<T>, resultReturn
 			break
 		}
 	}
-	if (resultReturn) {
-		return resultReturn(result, index)
+
+	if (index == -1) return
+
+	if (transform) {
+		return transform(result, index)
 	} else {
-		return result
+		return result as any
 	}
 }
 
-export const query = <T>(array: T[], query: PLogicalSelector<T>) => {
+/**
+ * Get the elements of an array that pass the logical selector.
+ * @param array Target array.
+ * @param logicalSelector Logical selector.
+ * @param transform A function that transforms the selected elements, if provided.
+ * @returns A new array with the selected elements.
+ */
+export const query = <T, K = T>(array: T[], query: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K[] => {
 	const results: T[] = []
 	for (const [i, element] of array.entries()) {
 		let success = true
@@ -128,11 +158,26 @@ export const query = <T>(array: T[], query: PLogicalSelector<T>) => {
 		}
 		if (success) results.push(element)
 	}
-	return results
+	
+	if (transform) {
+		return results.map(transform)
+	} else {
+		return results as any
+	}
 }
 
-export const extractOne = <T>(array: T[], query: PLogicalSelector<T>) => {
-	if (array == null) return null
+/**
+ * Get the first element of an array that pass the logical selector, and delete the element from the original array.
+ * @param array Target array.
+ * @param logicalSelector Logical selector.
+ * @param transform A function that transforms the selected element, if provided.
+ * @returns The selected element.
+ */
+export const extractOne = <T, K = T>(array: T[], query: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K | undefined => {
+	if (array == null || !array?.length) return
+
+	let result: T
+	let index = -1
 	for (const [i, element] of array.entries()) {
 		let success = true
 		if (typeof query == 'object') {
@@ -146,27 +191,31 @@ export const extractOne = <T>(array: T[], query: PLogicalSelector<T>) => {
 		} else {
 			success = !!query(element, i)
 		}
-		if (success) return array.splice(i, 1)[0]
+		if (success) {
+			result = element
+			index = i
+			break
+		}
 	}
-	return null
+
+	if (index == -1) return
+
+	array.splice(index, 1)
+	if (transform) {
+		return transform(result, index)
+	} else {
+		return result as any
+	}
 }
 
 /**
- * Delete elements on an array.
+ * Get the elements of an array that pass the logical selector.
  * @param array Target array.
- * @param query Logical condition.
- * ```javascript
- * const myarray = [
- *     { prop1: 'oneA', prop2: 'twoA', prop3: 'threeA' },
- *     { prop1: 'oneB', prop2: 'twoB', prop3: 'threeB' },
- *     { prop1: 'oneC', prop2: 'twoC', prop3: 'threeC' },
- * ]
- * console.log(PUtilsArray.extract(myarray, { prop2: 'twoB' })) // { prop1: 'oneB', prop2: 'twoB', prop3: 'threeB' }
- * console.log(myarray) // { prop1: 'oneA', prop2: 'twoA', prop3: 'threeA' }, { prop1: 'oneC', prop2: 'twoC', prop3: 'threeC' }
- * ```
- * @returns An array with the deleted elements.
+ * @param logicalSelector Logical selector.
+ * @param transform A function that transforms the selected elements, if provided.
+ * @returns A new array with the selected elements.
  */
-export const extract = <T>(array: T[], query: PLogicalSelector<T>) => {
+export const extract = <T, K = T>(array: T[], query: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K[] => {
 	let i = 0
 	const results: T[] = []
 	while (i < array.length) {
@@ -189,7 +238,12 @@ export const extract = <T>(array: T[], query: PLogicalSelector<T>) => {
 			i++
 		}
 	}
-	return results
+	
+	if (transform) {
+		return results.map(transform)
+	} else {
+		return results as any
+	}
 }
 
 export const groupBy = <T = never, K = never>(array: K[], setterPropertyName: (element: K, index?: number) => string | number | symbol, transform?: (element: K) => T) => {
