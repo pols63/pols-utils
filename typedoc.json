@@ -9,9 +9,9 @@
 	"excludePrivate": true,
 	"excludeProtected": true,
 	"excludeExternals": true,
-	"excludeTags": [
-		"@returns"
-	],
+	// "excludeTags": [
+	// 	"@returns"
+	// ],
 	"sort": [
 		"kind",
 		"instance-first",

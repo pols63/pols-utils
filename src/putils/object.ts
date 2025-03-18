@@ -1,4 +1,4 @@
-import { PRecord } from "./constants"
+import { PRecord } from "../constants"
 
 export const getValue = (target: PRecord, path: string, stringToObject = true): unknown => {
 	const arr = path.split(/\./)
