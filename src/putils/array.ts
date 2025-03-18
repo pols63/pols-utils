@@ -137,24 +137,24 @@ export const queryOne = <T, K = T>(array: T[], logicalSelector: PLogicalSelector
  * @param transform A function that transforms the selected elements, if provided.
  * @returns A new array with the selected elements.
  */
-export const query = <T, K = T>(array: T[], query: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K[] => {
+export const query = <T, K = T>(array: T[], logicalSelector: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K[] => {
 	const results: T[] = []
 	for (const [i, element] of array.entries()) {
 		let success = true
-		if (typeof query == 'object') {
+		if (typeof logicalSelector == 'object') {
 			if (typeof element != 'object') continue
-			for (const p in query) {
+			for (const p in logicalSelector) {
 				const valueOfElement = getValue((element as unknown) as PRecord, p)
-				const queryProperty = query[p]
+				const queryProperty = logicalSelector[p]
 				if (queryProperty == null && valueOfElement == null) continue
 				if (queryProperty instanceof RegExp && typeof valueOfElement == 'string' && valueOfElement.match(queryProperty)) continue
-				if (valueOfElement !== query[p]) {
+				if (valueOfElement !== logicalSelector[p]) {
 					success = false
 					break
 				}
 			}
 		} else {
-			success = !!query(element, i)
+			success = !!logicalSelector(element, i)
 		}
 		if (success) results.push(element)
 	}
@@ -173,23 +173,23 @@ export const query = <T, K = T>(array: T[], query: PLogicalSelector<T>, transfor
  * @param transform A function that transforms the selected element, if provided.
  * @returns The selected element.
  */
-export const extractOne = <T, K = T>(array: T[], query: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K | undefined => {
+export const extractOne = <T, K = T>(array: T[], logicalSelector: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K | undefined => {
 	if (array == null || !array?.length) return
 
 	let result: T
 	let index = -1
 	for (const [i, element] of array.entries()) {
 		let success = true
-		if (typeof query == 'object') {
+		if (typeof logicalSelector == 'object') {
 			if (typeof element != 'object') continue
-			for (const p in query) {
-				if (getValue((element as unknown) as PRecord, p) !== query[p]) {
+			for (const p in logicalSelector) {
+				if (getValue((element as unknown) as PRecord, p) !== logicalSelector[p]) {
 					success = false
 					break
 				}
 			}
 		} else {
-			success = !!query(element, i)
+			success = !!logicalSelector(element, i)
 		}
 		if (success) {
 			result = element
@@ -215,22 +215,22 @@ export const extractOne = <T, K = T>(array: T[], query: PLogicalSelector<T>, tra
  * @param transform A function that transforms the selected elements, if provided.
  * @returns A new array with the selected elements.
  */
-export const extract = <T, K = T>(array: T[], query: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K[] => {
+export const extract = <T, K = T>(array: T[], logicalSelector: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K[] => {
 	let i = 0
 	const results: T[] = []
 	while (i < array.length) {
 		const element = array[i]
 		let success = true
-		if (typeof query == 'object') {
+		if (typeof logicalSelector == 'object') {
 			if (typeof element != 'object') continue
-			for (const p in query) {
-				if (getValue((element as unknown) as PRecord, p) !== query[p]) {
+			for (const p in logicalSelector) {
+				if (getValue((element as unknown) as PRecord, p) !== logicalSelector[p]) {
 					success = false
 					break
 				}
 			}
 		} else {
-			success = !!query(element, i)
+			success = !!logicalSelector(element, i)
 		}
 		if (success) {
 			results.push(array.splice(i, 1)[0])
@@ -246,6 +246,32 @@ export const extract = <T, K = T>(array: T[], query: PLogicalSelector<T>, transf
 	}
 }
 
+/**
+ * Group elements of an array.
+ * @param array Target array.
+ * @param setterPropertyName Callback that get the key of each group.
+ * @param transform Callback for transform of each element in tha array.
+ * @returns A new object with the elements grouped.
+ * ```javascript
+ * const pets = [
+ *     { type: 'dog', name: 'Fido' },
+ *     { type: 'dog', name: 'Chacalin' },
+ *     { type: 'cat', name: 'Mr. Brown' },
+ *     { type: 'cat', name: 'Night' },
+ * ]
+ * console.log(PUtilsArray.groupBy(pets, pet => pet.type))
+ * // {
+ * //     dog: [
+ * //         { type: 'dog', name: 'Fido' },
+ * //         { type: 'dog', name: 'Chacalin' },
+ * //     ],
+ * //     cat: [
+ * //         { type: 'cat', name: 'Mr. Brown' },
+ * //         { type: 'cat', name: 'Night' },
+ * //     ],
+ * // }
+ * ```
+ */
 export const groupBy = <T = never, K = never>(array: K[], setterPropertyName: (element: K, index?: number) => string | number | symbol, transform?: (element: K) => T) => {
 	const results: PRecord<([T] extends [never] ? K : T)[]> = {}
 	for (const [i, element] of array.entries()) {
@@ -260,6 +286,12 @@ export const groupBy = <T = never, K = never>(array: K[], setterPropertyName: (e
 	return results
 }
 
+/**
+ * Inserts an element into an array if the `check` callback returns `false` for every element. Otherwise, it removes the element(s) for wich `check` returns `true`. 
+ * @param array Target array.
+ * @param element Element for insert if `check` returns `false` for every element of the array.
+ * @param check Callback that check every element in the array.
+ */
 export const toggleElement = <T>(array: T[], element: T, check: (element: T, index?: number) => boolean) => {
 	let index: number | null = null
 	/* Busca el elemento en el arreglo y captura su índice */

@@ -17,14 +17,6 @@
 		".": {
 			"import": "./dist/index.js",
 			"require": "./dist/index.js"
-		},
-		"./constants": {
-			"import": "./dist/constants.js",
-			"require": "./dist/constants.js"
-		},
-		"./pbase64": {
-			"import": "./dist/pbase64.js",
-			"require": "./dist/pbase64.js"
 		}
 	},
 	"devDependencies": {
