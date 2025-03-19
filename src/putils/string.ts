@@ -1,5 +1,14 @@
 import stream from 'stream'
 
+/**
+ * Sets upper to first letter at string
+ * @param value Target string.
+ * @returns A new string with the first letter at upper.
+ * @example
+ * ```javascript
+ * console
+ * ```
+ */
 export const ucWords = (value: string) => value.replace(/(\s|^)./g, (letter: string) => letter.toUpperCase())
 
 export const highlight = (value: string, tag = 'b') => value.replace(new RegExp(`('|")(.+?)\\1`, 'g'), (a: string, b: string, c: string) => `<${tag}>${c}</${tag}>`)

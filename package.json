@@ -21,6 +21,7 @@
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.13.0",
+		"@types/mime-types": "^2.1.4",
 		"@types/node": "^22.7.9",
 		"esdoc": "^1.1.0",
 		"esdoc-standard-plugin": "^1.0.0",
@@ -30,5 +31,8 @@
 		"typedoc": "^0.28.0",
 		"typescript": "^5.6.3",
 		"typescript-eslint": "^8.11.0"
+	},
+	"dependencies": {
+		"mime-types": "^2.1.35"
 	}
 }
