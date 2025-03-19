@@ -22,8 +22,22 @@ export * as PUtilsDate from './putils/date'
  * ```
  */
 export * as PUtilsArray from './putils/array'
+/**
+ * Math helpers.
+ * ## Import
+ * ```javascript
+ * import { PUtilsMath } from 'pols-utils'
+ * ```
+ */
 export * as PUtilsMath from './putils/math'
-export * as PUtilsReadableStream from './putils/readableStream'
+/**
+ * Readable streams helpers.
+ * ## Import
+ * ```javascript
+ * import { PUtilsRS } from 'pols-utils'
+ * ```
+ */
+export * as PUtilsRS from './putils/readableStream'
 /**
  * String helpers and manipulation.
  * ## Import
@@ -32,7 +46,21 @@ export * as PUtilsReadableStream from './putils/readableStream'
  * ```
  */
 export * as PUtilsString from './putils/string'
+/**
+ * Function helpers.
+ * ## Import
+ * ```javascript
+ * import { PUtilsFunction } from 'pols-utils'
+ * ```
+ */
 export * as PUtilsFunction from './putils/function'
+/**
+ * Numbers helpers.
+ * ## Import
+ * ```javascript
+ * import { PUtilsNumber } from 'pols-utils'
+ * ```
+ */
 export * as PUtilsNumber from './putils/number'
 export * from './pbase64'
 export * from './constants'

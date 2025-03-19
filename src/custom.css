@@ -6,4 +6,39 @@ html {
     body {
         font-size: 12px;
     }
+
+	code, pre {
+		border-radius: 0.4em;
+	}
+}
+
+@media (prefers-color-scheme: light) {
+	:root {
+    	--code-background: var(--light-code-background);
+    	--pre-background: var(--light-pre-background);
+	}
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+    	--code-background: var(--dark-code-background);
+    	--pre-background: var(--dark-pre-background);
+	}
+}
+
+:root {
+	--light-color-background: #fdfdfd;
+    --light-code-background: #d3d3d3;
+    --light-pre-background: #f3f3f3;
+
+	--dark-color-background: #2b2e33;
+    --dark-pre-background: #000000;
+}
+
+code { 
+	background: var(--code-background);
+}
+
+pre, pre > code { 
+	background: var(--pre-background);
 }
