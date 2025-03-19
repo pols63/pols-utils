@@ -7,3 +7,7 @@ A lightweight and versatile library providing a collection of utility functions 
 ```sh
 npm i pols-utils
 ```
+
+## Documentation
+
+[https://pols63.github.io/pols-utils/](https://pols63.github.io/pols-utils/)
