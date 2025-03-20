@@ -412,7 +412,7 @@ export const chunks = <T>(array: T[], length: number): T[][] => {
  * // }
  * ```
  */
-export const index = <T, K = never>(array: T[], setterPropertyName: (element: T, index?: number) => string, formatElement?: (element: T, index?: number) => K) => {
+export const indexBy = <T, K = never>(array: T[], setterPropertyName: (element: T, index?: number) => string, formatElement?: (element: T, index?: number) => K) => {
 	const result: Record<string, [K] extends [never] ? T : K> = {}
 	for (const [i, element] of array?.entries() ?? []) {
 		result[setterPropertyName(element, i)] = (formatElement?.(element, i) ?? element) as any
