@@ -70,5 +70,13 @@ export * as PUtilsNumber from './putils/number'
  * ```
  */
 export * as PUtilsArrayBuffer from './putils/arrayBuffer'
+/**
+ * Object helpers.
+ * ## Import
+ * ```javascript
+ * import { PUtilsArrayBuffer } from 'pols-utils'
+ * ```
+ */
+export * as PUtilsObject from './putils/object'
 export * from './pbase64'
 export * from './constants'
