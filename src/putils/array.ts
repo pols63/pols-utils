@@ -103,7 +103,7 @@ export type PLogicalSelector<T> = (Partial<T> & Record<string, unknown>) | ((ele
  * // { type: 'dog', name: 'Fido' },
  * ```
  */
-export const queryOne = <T, K = T>(array: T[], logicalSelector: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K | undefined => {
+export const filterOne = <T, K = T>(array: T[], logicalSelector: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K | undefined => {
 	if (array == null || !array.length) return
 
 	let result: T
@@ -167,7 +167,7 @@ export const queryOne = <T, K = T>(array: T[], logicalSelector: PLogicalSelector
  * // ]
  * ```
  */
-export const query = <T, K = T>(array: T[], logicalSelector: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K[] => {
+export const filter = <T, K = T>(array: T[], logicalSelector: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K[] => {
 	const results: T[] = []
 	for (const [i, element] of array.entries()) {
 		let success = true
