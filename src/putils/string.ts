@@ -58,20 +58,10 @@ export const right = (value: string | number, length: number): string => {
 	return text.substring(text.length - length)
 }
 
-export const padLeft = (value: string | number, length: number, text = '0'): string => {
-	if (length < 0) throw new Error(`'length' debe ser positivo`)
-	if (Math.ceil(length) != length) throw new Error(`'length' debe ser un número entero`)
-	const target = typeof value == 'number' ? value.toString() : value
-	if (target.length > length || text == '') return target
-	const chain = Array(length + 1).join(text)
-	return right(`${chain}${target}`, length)
+export const padStart = (value: string | number, length: number, fillString = '0'): string => {
+	return String(value ?? '').padStart(length, fillString)
 }
 
-export const padRight = (value: string | number, length: number, text = '0'): string => {
-	if (length < 0) throw new Error(`'length' debe ser positivo`)
-	if (Math.ceil(length) != length) throw new Error(`'length' debe ser un número entero`)
-	const target = typeof value == 'number' ? value.toString() : value
-	if (target.length > length || text == '') return target
-	const chain = Array(length + 1).join(text)
-	return left(`${target}${chain}`, length)
+export const padEnd = (value: string | number, length: number, fillString = '0'): string => {
+	return String(value ?? '').padEnd(length, fillString)
 }

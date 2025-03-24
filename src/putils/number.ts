@@ -1,4 +1,4 @@
-import { padLeft, padRight } from "./string"
+import { padEnd } from "./string"
 
 export const format = (value: number, { decimals = 0, decimalSeparator = '.', millarSeparator = ',', significativeNumber = false }: {
 	decimals?: number
@@ -64,11 +64,11 @@ export const noScientistNotation = (value: number) => {
 	}
 	/* Construye el número a presentar */
 	if (exponentialSign === '-') {
-		number = padLeft(number, exponentialNumber + 1)
+		number = padStart(number, exponentialNumber + 1)
 		const index = number.length - exponentialNumber
 		number = number.substring(0, index) + '.' + number.substring(index)
 	} else {
-		number += padRight('', exponentialNumber)
+		number += padEnd('', exponentialNumber)
 	}
 	return `${sign}${number}`
 }
@@ -79,7 +79,7 @@ export const write = (value: number, decimals: number) => {
 	/* Separa la parte decimal */
 	const arr1 = text.split('.')
 	const parts = {
-		integer: padLeft(arr1[0], Math.ceil(arr1[0].length / 3) * 3),
+		integer: padStart(arr1[0], Math.ceil(arr1[0].length / 3) * 3),
 		decimal: arr1[1]
 	}
 
@@ -117,7 +117,7 @@ export const write = (value: number, decimals: number) => {
 			separator = separator.replace('ÓN', 'ONES')
 		}
 		return `${r} ${separator}`
-	}).join(' ').trim() + (decimals ? ` CON ${parts.decimal}/${padRight('1', decimals + 1)}` : '')
+	}).join(' ').trim() + (decimals ? ` CON ${parts.decimal}/${padEnd('1', decimals + 1)}` : '')
 }
 
 export type PToMatch = {
@@ -208,4 +208,8 @@ export const pluralize = (value: number, singular: string, plural: string) => `$
 export const parse = (value?: unknown, defaultValue = 0) => {
 	const transformed = Number(value)
 	return isNaN(transformed) ? defaultValue : transformed
+}
+
+export const padStart = (value: string | number, length: number, fillString = '0') => {
+	return String(value).padStart(length, fillString)
 }

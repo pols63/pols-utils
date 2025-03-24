@@ -1,4 +1,4 @@
-import { padLeft } from "./string"
+import { padStart } from "./string"
 
 export enum PLanguages {
 	SPANISH = 'SPANISH',
@@ -114,24 +114,24 @@ export const format = (date: Date, mask = '@y-@mm-@dd @hh:@ii:@ss.@lll', languag
 		.replace(/@y/g, date.getFullYear().toString())
 		.replace(/@mmmm/g, monthName(date, false, language))
 		.replace(/@mmm/g, monthName(date, true, language))
-		.replace(/@mm/g, padLeft(date.getMonth() + 1, 2, "0"))
+		.replace(/@mm/g, padStart(date.getMonth() + 1, 2, "0"))
 		.replace(/@m/g, (date.getMonth() + 1).toString())
 		.replace(/@dddd/g, weekdayName(date, false, language))
 		.replace(/@ddd/g, weekdayName(date, true, language))
-		.replace(/@dd/g, padLeft(date.getDate(), 2))
+		.replace(/@dd/g, padStart(date.getDate(), 2))
 		.replace(/@d/g, date.getDate().toString())
 		/* 24 horas */
-		.replace(/@hh/g, padLeft(date.getHours(), 2))
+		.replace(/@hh/g, padStart(date.getHours(), 2))
 		.replace(/@h/g, date.getHours().toString())
 		/* 12 horas */
-		.replace(/@oo/g, padLeft(hours12, 2))
+		.replace(/@oo/g, padStart(hours12, 2))
 		.replace(/@o/g, hours.toString())
-		.replace(/@ii/g, padLeft(date.getMinutes(), 2))
+		.replace(/@ii/g, padStart(date.getMinutes(), 2))
 		.replace(/@i/g, date.getMinutes().toString())
-		.replace(/@ss/g, padLeft(date.getSeconds(), 2))
+		.replace(/@ss/g, padStart(date.getSeconds(), 2))
 		.replace(/@s/g, date.getSeconds().toString())
-		.replace(/@lll/g, padLeft(date.getMilliseconds(), 3))
-		.replace(/@ll/g, padLeft(date.getMilliseconds(), 2))
+		.replace(/@lll/g, padStart(date.getMilliseconds(), 3))
+		.replace(/@ll/g, padStart(date.getMilliseconds(), 2))
 		.replace(/@l/g, date.getMilliseconds().toString())
 		.replace(/@w/g, getWeek(date).toString())
 		.replace(/@eee/g, pm ? 'p.m.' : 'a.m.')
