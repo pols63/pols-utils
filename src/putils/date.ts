@@ -104,13 +104,17 @@ export const getWeek = (date: Date): number => {
  * @param language Indicate the language. If it isn't provided, it will use the `GlobalLanguage`.
  * @returns Formatted date on string.
  */
-export const format = (date: Date, mask = '@y-@mm-@dd @hh:@ii:@ss.@lll', language?: PLanguages): string => {
-	if (!language) language = globalLanguage
+export const format: {
+	(date: Date, mask?: string, language?: PLanguages): string
+	defaultMask?: string
+	defaultLanguage?: PLanguages
+} = (date: Date, mask?: string, language?: PLanguages): string => {
+	if (!language) language = format.defaultLanguage ?? globalLanguage
 	const hours = date.getHours()
 	const hours12 = (hours % 12) || 12
 	const pm = hours >= 12
 	if (isNaN(date.getTime())) return ''
-	return mask
+	return (mask ?? format.defaultMask ?? '')
 		.replace(/@y/g, date.getFullYear().toString())
 		.replace(/@mmmm/g, monthName(date, false, language))
 		.replace(/@mmm/g, monthName(date, true, language))
@@ -141,3 +145,5 @@ export const format = (date: Date, mask = '@y-@mm-@dd @hh:@ii:@ss.@lll', languag
 		.replace(/@EE/g, pm ? 'PM' : 'AM')
 		.replace(/@E/g, pm ? 'P' : 'A')
 }
+format.defaultMask = '@y-@mm-@dd @hh:@ii:@ss.@lll'
+format.defaultLanguage = PLanguages.ENGLISH
