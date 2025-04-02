@@ -1,19 +1,33 @@
 import stream from 'stream'
 
 /**
- * Sets upper to first letter at string
+ * Sets upper the first letter of each word in a string.
  * @param value Target string.
- * @returns A new string with the first letter at upper.
+ * @param toLowerFirst Set if to lower before to capitalize.
+ * @returns A new string.
  * @example
  * ```javascript
- * console
+ * console.log(PUtilsString.capitalize('Hi user!')) // 'Hi User!'
+ * console.log(PUtilsString.capitalize('Hi JEAN!')) // 'Hi Jean!'
+ * console.log(PUtilsString.capitalize('hi JEAN!', false)) // 'Hi JEAN!'
  * ```
  */
-export const ucWords = (value: string) => value.replace(/(\s|^)./g, (letter: string) => letter.toUpperCase())
+export const capitalize = (value: string, toLowerFirst: boolean = true) => {
+	if (toLowerFirst) value = value.toLowerCase()
+	value.replace(/(\s|^)./g, (letter: string) => letter.toUpperCase())
+}
 
+/**
+ * Replace quotation mark by html tag.
+ * @param value Target text.
+ * @param tag Tag name.
+ * @returns A new string.
+ * @example
+ * ```javascript
+ * console.log(PUtilsString.highlight(\`Hi 'user'!\`)) // 'Hi <b>user</b>!'
+ * ```
+ */
 export const highlight = (value: string, tag = 'b') => value.replace(new RegExp(`('|")(.+?)\\1`, 'g'), (a: string, b: string, c: string) => `<${tag}>${c}</${tag}>`)
-
-export const capitalize = (value: string) => value.toLowerCase().replace(/(\s|^)[a-záéíóúñ]/g, (c) => c.toUpperCase())
 
 export const withoutAccentMark = (value?: string) => {
 	const accentMarks: Record<string, string> = { Á: 'A', É: 'E', Í: 'I', Ó: 'O', Ú: 'U', á: 'a', é: 'e', í: 'i', ó: 'o', ú: 'u' }
@@ -64,4 +78,9 @@ export const padStart = (value: string | number, length: number, fillString = '0
 
 export const padEnd = (value: string | number, length: number, fillString = '0'): string => {
 	return String(value ?? '').padEnd(length, fillString)
+}
+
+export const toArrayBuffer = (value: string, enconding: BufferEncoding = 'utf-8') => {
+	const buffer = Buffer.from(value, enconding)
+    return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
 }
