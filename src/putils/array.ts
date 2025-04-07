@@ -2,11 +2,12 @@ import { PRecord } from "../constants"
 import { getValue } from "./object"
 
 /**
- * Exchange the position of two elements. 
- * @param array Target array.
- * @param originIndex First element index.
- * @param destinationIndex Second element index.
- * @returns Target array.
+ * Exchanges the position of two elements in an array.
+ * @typeParam T The type of elements in the array.
+ * @param array The target array.
+ * @param originIndex The index of the first element to swap.
+ * @param destinationIndex The index of the second elemento to swap.
+ * @returns The same target array.
  * @example
  * ```javascript
  * const myarray = [0, 1, 2, 3, 4]
@@ -33,11 +34,12 @@ export const swap = (array: unknown[], originIndex: number, destinationIndex: nu
 }
 
 /**
- * Relocate one element of an array.
- * @param array Target array.
- * @param originIndex First element index.
- * @param destinationIndex Second element index.
- * @returns Target array.
+ * Moves an element from one position to another within an array.
+ * @typeParam T The type of elements in the array.
+ * @param array The target array.
+ * @param originIndex The index of the element to move.
+ * @param destinationIndex The index where the element will be inserted.
+ * @returns The same target array.
  * @example
  * ```javascript
  * const myarray = [0, 1, 2, 3, 4]
@@ -59,9 +61,11 @@ export const moveItem = (array: unknown[], originIndex: number, destinationIndex
 }
 
 /**
- * It is used to compare every elements in the array. It can be used of two ways:
+ * Represents a logical selector used to filter elements in an array. It supports two modes:
  * #### 1. Object comparison 
- * Is useful with object arrays. Each property of the logical selector will be compare with every element of the target array at same properties. If their values matches, return true.
+ * Useful when workin with arrays of objects. Each property in the selector is compared against the corresponding property in every element of the array. If all values match, the element is included in the result.
+ *
+ * Nested properties can be accessed using dot notation.
  * ```javascript
  * const myarray = [
  *     { prop1: 'oneA', prop2: 'twoA', prop3: 'threeA' },
@@ -71,8 +75,9 @@ export const moveItem = (array: unknown[], originIndex: number, destinationIndex
  * console.log(PUtilsArray.query(myarray, { prop2: 'twoB' })) // [{ prop1: 'oneB', prop2: 'twoB', prop3: 'threeB' }]
  * console.log(PUtilsArray.query(myarray, { 'prop3.prop32': 'threeCB' })) // [{ prop1: 'oneC', prop2: 'twoC', prop3: { prop31: 'threeCA', prop32: 'threeCB' } }]
  * ```
- * #### 2. Evaluate function 
- * In this case, it must be a function to execute for each element in the array. It should return `true` if the element must be selected.
+ * #### 2. Predicate function 
+ * Alternatively, a function can be provided. It will be called for each element in the array, and the element will be included in the result if the function returns `true`.
+ *
  * ```javascript
  * const myarray = [
  *     { prop1: 'oneA', prop2: 'twoA', prop3: 'threeA' },
@@ -86,11 +91,13 @@ export const moveItem = (array: unknown[], originIndex: number, destinationIndex
 export type PLogicalSelector<T> = (Partial<T> & Record<string, unknown>) | ((element: T, index: number) => boolean)
 
 /**
- * Gets the first element of an array that satisfies the given logical selector.
- * @param array Target array.
- * @param logicalSelector Logical selector.
- * @param transform A function that transforms the selected element, if provided.
- * @returns The selected element.
+ * Gets the first element in the array that matches the given logical selector.
+ * @typeParam T The type of elements in the array.
+ * @typeParam K The return type of the transformation function, if provided.
+ * @param array The target array to search in.
+ * @param logicalSelector The selector used to identify the matching element. This can be either a predicate function or an object for property-based matching.
+ * @param transform A function to transform the selected element before returning it.
+ * @returns The first matching element, optionally transformed.
  * @example
  * ```javascript
  * const pets = [
@@ -99,8 +106,14 @@ export type PLogicalSelector<T> = (Partial<T> & Record<string, unknown>) | ((ele
  *     { type: 'cat', name: 'Mr. Brown' },
  *     { type: 'cat', name: 'Night' },
  * ]
- * console.log(PUtilsArray.queryOne(pets, pet => pet.type == 'dog')) // Same PUtilsArray.queryOne(pets, { type: 'dog' })
- * // { type: 'dog', name: 'Fido' },
+ * console.log(PUtilsArray.queryOne(pets, pet => pet.type === 'dog'))
+ * // => { type: 'dog', name: 'Fido' }
+ *
+ * console.log(PUtilsArray.queryOne(pets, { type: 'dog' }))
+ * // => { type: 'dog', name: 'Fido' }
+ *
+ * console.log(PUtilsArray.queryOne(pets, { type: 'cat' }, pet => pet.name))
+ * // => 'Mr. Brown'
  * ```
  */
 export const filterOne = <T, K = T>(array: T[], logicalSelector: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K | undefined => {
@@ -142,11 +155,13 @@ export const filterOne = <T, K = T>(array: T[], logicalSelector: PLogicalSelecto
 }
 
 /**
- * Get the elements of an array that pass the logical selector.
- * @param array Target array.
- * @param logicalSelector Logical selector.
- * @param transform A function that transforms the selected elements, if provided.
- * @returns A new array with the selected elements.
+ * Gets all elements in the array that match the given logical selector.
+ * @typeParam T The type of elements in the array.
+ * @typeParam K The return type of the transformation function, if provided.
+ * @param array The target array to search in.
+ * @param logicalSelector The selector used to identify the matching element. This can be either a predicate function or an object for property-based matching.
+ * @param transform A function to transform the selected element before returning it.
+ * @returns A new array with all matching elements, optionally transformed.
  * @example
  * ```javascript
  * const pets = [
@@ -155,16 +170,18 @@ export const filterOne = <T, K = T>(array: T[], logicalSelector: PLogicalSelecto
  *     { type: 'cat', name: 'Mr. Brown' },
  *     { type: 'cat', name: 'Night' },
  * ]
- * console.log(PUtilsArray.query(pets, pet => pet.type == 'dog')) // Same PUtilsArray.query(pets, { type: 'dog' })
+ * console.log(PUtilsArray.query(pets, pet => pet.type == 'dog'))
  * // [
  * //     { type: 'dog', name: 'Fido' },
  * //     { type: 'dog', name: 'Chacalin' },
  * // ]
- * console.log(PUtilsArray.query(pets, { type: 'dog' }, pet => pet.name.toUppercase()) // Same PUtilsArray.query(pets, { type: 'dog' })
+ * console.log(PUtilsArray.query(pets, { type: 'dog' }))
  * // [
- * //     { type: 'dog', name: 'FIDO' },
- * //     { type: 'dog', name: 'CHACALIN' },
+ * //     { type: 'dog', name: 'Fido' },
+ * //     { type: 'dog', name: 'Chacalin' },
  * // ]
+ * console.log(PUtilsArray.query(pets, { type: 'dog' }, pet => pet.name.toUpperCase())
+ * // [ 'FIDO', 'CHACALIN' ]
  * ```
  */
 export const filter = <T, K = T>(array: T[], logicalSelector: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K[] => {
@@ -197,11 +214,31 @@ export const filter = <T, K = T>(array: T[], logicalSelector: PLogicalSelector<T
 }
 
 /**
- * Get the first element of an array that pass the logical selector, and delete the element from the original array.
- * @param array Target array.
- * @param logicalSelector Logical selector.
- * @param transform A function that transforms the selected element, if provided.
- * @returns The selected element.
+ * Extracts (removes and returns) the first element in an array that matches the given logical selector.
+ * @typeParam T The type of elements in the array.
+ * @typeParam K The return type of the transformation function, if provided.
+ * @param array The target array to search and mutate.
+ * @param logicalSelector The selector used to identify the matching element. This can be either a predicate function or an object for property-based matching.
+ * @param transform A function to transform the selected element before returning it.
+ * @returns The first matching element, optionally transformed. Returns `undefined` if no match if found.
+ * @example
+ * ```javascript
+ * const pets = [
+ *     { type: 'dog', name: 'Fido' },
+ *     { type: 'dog', name: 'Chacalin' },
+ *     { type: 'cat', name: 'Mr. Brown' },
+ *     { type: 'cat', name: 'Night' },
+ * ]
+ * console.log(PUtilsArray.extractOne(pets, pet => pet.type === 'dog'))
+ * // => { type: 'dog', name: 'Fido' }
+ *
+ * console.log(pets)
+ * // => [
+ * //  { type: 'dog', name: 'Chacalin' },
+ * //  { type: 'cat', name: 'Mr. Brown' },
+ * //  { type: 'cat', name: 'Night' },
+ * // ]
+ * ```
  */
 export const extractOne = <T, K = T>(array: T[], logicalSelector: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K | undefined => {
 	if (array == null || !array?.length) return
@@ -239,11 +276,33 @@ export const extractOne = <T, K = T>(array: T[], logicalSelector: PLogicalSelect
 }
 
 /**
- * Get the elements of an array that pass the logical selector.
- * @param array Target array.
- * @param logicalSelector Logical selector.
- * @param transform A function that transforms the selected elements, if provided.
- * @returns A new array with the selected elements.
+ * Extracts (removes and returns) all elements in an array that match the given logical selector.
+ * @typeParam T The type of elements in the array.
+ * @typeParam K The return type of the transformation function, if provided.
+ * @param array the target array to search and mutate.
+ * @param logicalSelector The selector used to identify the matching element. This can be either a predicate function or an object for property-based matching.
+ * @param transform A function to transform the selected element before returning it.
+ * @returns A new array with all matching elements, optionally transformed. If no match is found, an empty array is returned.
+ * @example
+ * ```javascript
+ * const pets = [
+ *     { type: 'dog', name: 'Fido' },
+ *     { type: 'dog', name: 'Chacalin' },
+ *     { type: 'cat', name: 'Mr. Brown' },
+ *     { type: 'cat', name: 'Night' },
+ * ]
+ * console.log(PUtilsArray.extractOne(pets, pet => pet.type === 'dog'))
+ * // => [
+ * //  { type: 'dog', name: 'Fido' },
+ * //  { type: 'dog', name: 'Chacalin' },
+ * // ]
+ *
+ * console.log(pets)
+ * // => [
+ * //  { type: 'cat', name: 'Mr. Brown' },
+ * //  { type: 'cat', name: 'Night' },
+ * // ]
+ * ```
  */
 export const extract = <T, K = T>(array: T[], logicalSelector: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K[] => {
 	let i = 0
@@ -277,11 +336,12 @@ export const extract = <T, K = T>(array: T[], logicalSelector: PLogicalSelector<
 }
 
 /**
- * Group elements of an array.
- * @param array Target array.
- * @param setterPropertyName Callback that get the key of each group.
- * @param transform Callback for transform of each element in tha array.
- * @returns A new object with the elements grouped.
+ * Groups elements of an array based on a key provided by a callback function.
+ * @typeParam T The type of elements in the array.
+ * @param array The target array.
+ * @param setterPropertyName A callback function that gets the key of each group.
+ * @param transform A function that transforms each element before grouping.
+ * @returns A new object with the elements grouped by the key returned by the `setterPropertyName` function.
  * @example
  * ```javascript
  * const pets = [
@@ -318,10 +378,11 @@ export const groupBy = <T = never, K = never>(array: K[], setterPropertyName: (e
 }
 
 /**
- * Inserts an element into an array if the `check` callback returns `false` for every element. Otherwise, it removes the element(s) for wich `check` returns `true`. 
- * @param array Target array.
- * @param element Element for insert if `check` returns `false` for every element of the array.
- * @param check Callback that check every element in the array.
+ * Inserts an element into an array if the `check` callback function returns `false` for every element. Otherwise, it removes the element(s) for wich `check` returns `true`. 
+ * @param array The target array where the element will be toggled.
+ * @param element The element to insert if `check` returns `false` for all elements.
+ * @param check A callback function to check each element in the array.
+ * @return The modified array with the element toggled (added or removed).
  * @example
  * ```javascript
  * const pets = [
@@ -365,10 +426,11 @@ export const toggleElement = <T>(array: T[], element: T, check: (element: T, ind
 }
 
 /**
- * Split the array into chunks. Each chunk of the array will have a maximum length as specified by the parameter.
- * @param array Target array.
- * @param length Max length of the chunk.
- * @returns A chunks array.
+ * Split an array into smaller chunks. Each chunk will have a maximum length defined by the `length` parameter.
+ * @typeParam T The type of elements in the array.
+ * @param array The target array.
+ * @param length The maximun length of each chunk.
+ * @returns An array of chunks.
  * @example
  * ```javascript
  * const mynumbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -393,6 +455,7 @@ export const chunks = <T>(array: T[], length: number): T[][] => {
 
 /**
  * Indexes an array.
+ * @typeParam T The type of elements in the array.
  * @param array Target array.
  * @param setterPropertyName Function that returns the key of the index.
  * @param formatElement Transformation elements.
@@ -421,9 +484,10 @@ export const indexBy = <T, K = never>(array: T[], setterPropertyName: (element: 
 }
 
 /**
- * Get a new array with distinct elements. Only compare elements of primitive types.
- * @param array Target array.
- * @returns A new array with distinct elements.
+ * Gets a new array with only distinct elements. Only primitive values (string, number, boolean, etc) are compared.
+ * @typeParam T The type of elements in the array.
+ * @param array The target array.
+ * @returns A new array containing only unique elements.
  * @example
  * ```javascript
  * const mynumbers = [0, 1, 2, 2, 2, 5, 6, 7, 7, 7]
