@@ -71,9 +71,10 @@ export const getWeek = (date: Date): number => {
 }
 
 /**
- * Gets the formatted date.
- * @param date Target date.
- * @param mask Template of the format. Use this wildcards:
+ * Formats a given date according to a specified mask and language.
+ * @function
+ * @param date The target date to format.
+ * @param mask A string representing the date format. Should include this wildcard:
  * * `@y`: Year
  * * `@m`: Month (`'1'` for january through `'12'` for december).
  * * `@mm`: Month with leading zero (`'01'` for january through `'12'` for december).
@@ -101,13 +102,19 @@ export const getWeek = (date: Date): number => {
  * * `@E`: 12-Hour format symbol (`'A'` and `'P'`).
  * * `@EE`: 12-Hour format symbol (`'AM'` and `'PM'`).
  * * `@EEE`: 12-Hour format symbol (`'A.M.'` and `'P.M.'`).
- * @param language Indicate the language. If it isn't provided, it will use the `GlobalLanguage`.
- * @returns Formatted date on string.
+ * If not provided, the `PUtilsDate.defaultMask` property is used.
+ * @param language Specifying the language for days and months name of the formatted date. If not provided, the `PUtilsDate.defaultLanguage` property is used.
+ * @returns A string with the formatted date based on the provided mask and language.
  */
-export const format: {
-	(date: Date, mask?: string, language?: PLanguages): string
-	defaultMask?: string
-	defaultLanguage?: PLanguages
+export const format: ((date: Date, mask?: string, language?: PLanguages) => string) & {
+	/**
+	 * A default mask to use if `mask` not provided.
+	 */
+	defaultMask?: string;
+	/**
+	 * A default language to use if `language` not provided.
+	 */
+	defaultLanguage?: PLanguages;
 } = (date: Date, mask?: string, language?: PLanguages): string => {
 	if (!language) language = format.defaultLanguage ?? globalLanguage
 	const hours = date.getHours()
