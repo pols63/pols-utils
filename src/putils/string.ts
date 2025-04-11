@@ -14,7 +14,7 @@ import stream from 'stream'
  */
 export const capitalize = (value: string, toLowerFirst: boolean = true) => {
 	if (toLowerFirst) value = value.toLowerCase()
-	value.replace(/(\s|^)./g, (letter: string) => letter.toUpperCase())
+	return value.replace(/(\s|^)./g, (letter: string) => letter.toUpperCase())
 }
 
 /**
