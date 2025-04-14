@@ -1,9 +1,5 @@
+import { PLanguages } from "../constants"
 import { padStart } from "./string"
-
-export enum PLanguages {
-	SPANISH = 'SPANISH',
-	ENGLISH = 'ENGLISH',
-}
 
 export const DAYS: Record<PLanguages, string[]> = {
 	SPANISH: ['lunes', 'martes', 'mierrcoles', 'jueves', 'viernes', 'sabado', 'domingo'],

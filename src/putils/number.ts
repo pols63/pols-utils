@@ -1,13 +1,47 @@
+import { PLanguages } from "../constants"
 import { padEnd } from "./string"
 
-export const format = (value: number, { decimals = 0, decimalSeparator = '.', millarSeparator = ',', significativeNumber = false }: {
+/**
+ * Converts a number to a formatted string representation.
+ * @param value The numeric value to format.
+ * @param config Configuration object.
+ * @returns A formatted string representing the number.
+ * @example
+ * ```javascript
+ * console.log(PUtilsNumber.format(123456789.1234)) // 123,456,789
+ * console.log(PUtilsNumber.format(123456789.1234, { decimals: 2 })) // 123,456,789.12
+ * console.log(PUtilsNumber.format(123456789.1234, { decimals: 5 })) // 123,456,789.12340
+ * console.log(PUtilsNumber.format(123456789.1234, { decimals: 5, significativeNumber: true })) // 123,456,789.1234
+ * console.log(PUtilsNumber.format(123456789.1234, { decimals: 5, significativeNumber: true, decimalSeparator: ',', millarSeparator: ' ' })) // 123 456 789,1234
+ * ```
+ */
+export const format = (value: number, { decimals = 0, decimalSeparator = '.', thousandSeparator = ',', significativeNumber = false }: {
+	/**
+	 * Default `0`. Number of decimal places to include.
+	 */
 	decimals?: number
+	/**
+	 * Default `'.'`. Character to use as the decimal separator.
+	 */
 	decimalSeparator?: string
-	millarSeparator?: string
+	/**
+	 * Default `','`. Character to use as the thousand separator.
+	 */
+	thousandSeparator?: string
+	/**
+	 * Default `false`. If `true`, trailing zeros in the decimal part will be omitted.
+	 */
 	significativeNumber?: boolean
 } = {}) => {
-	const temp = round(value, decimals).toFixed(decimals)
-	const matches = temp.match(/(-?)([0-9]*)\.?([0-9]*)/)
+	if (!isFinite(value) || isNaN(value)) return value.toString()
+
+	const stringValue = value.toString().split('e')
+
+	const numberPart = round(Number(stringValue[0]), decimals).toFixed(decimals)
+
+	const parts = numberPart.match(/^(.*?)(e(.*?))?$/)
+
+	const matches = parts[0].match(/(-?)([0-9]*)\.?([0-9]*)/)
 	if (matches) {
 		const signal = matches[1]
 		const integer = matches[2]
@@ -15,22 +49,44 @@ export const format = (value: number, { decimals = 0, decimalSeparator = '.', mi
 		let finalInteger = ''
 		let count = 0
 		for (let i = integer.length - 1; i >= 0; i--) {
-			finalInteger = `${integer[i]}${count % 3 === 0 && count > 0 ? millarSeparator : ''}${finalInteger}`
+			finalInteger = `${integer[i]}${count % 3 === 0 && count > 0 ? thousandSeparator : ''}${finalInteger}`
 			count++
 		}
-		const result = `${signal}${finalInteger}${decimals ? `${typeof decimalSeparator === 'string' ? decimalSeparator : '.'}${decimal}` : ''}`
-		if (significativeNumber === true) {
-			return result.replace(/(\.)([0-9]*?)0+$/, (_a, _b, c) => c ? `.${c}` : '')
+		const result = `${signal}${finalInteger}${decimals ? `${decimalSeparator}${decimal}` : ''}`
+		if (significativeNumber) {
+			return result.replace(/(\.)([0-9]*?)0+$/, (_a, _b, c) => c ? `.${c}` : '') + (stringValue[1] ?? '')
 		} else {
-			return result
+			return result + (stringValue[1] ?? '')
 		}
 	} else {
-		return ''
+		return stringValue[1] ?? ''
 	}
 }
 
-export const bytesRepresentation = (size: number) => {
-	const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+/**
+ * Converts a numeric value to a human-readable string representing a size in bytes. The value is divided by 1024 iteratively until it fits into a suitable unit (K, M, G, etc.).
+ * @param size The numeric value in bytes to format.
+ * @param config Configuration object.
+ * @returns A string representation of the size with the appropriate unit.
+ * @example
+ * ```javascript
+ * console.log(PUtilsNumber.sizeRepresentation(2300)) // "2.25 K"
+ * console.log(PUtilsNumber.sizeRepresentation(2300456)) // "2.19 M"
+ * console.log(PUtilsNumber.sizeRepresentation(1048576)) // "1.00 M"
+ * console.log(PUtilsNumber.sizeRepresentation(1099511627776)) // "1.00 T"
+ * ```
+ */
+export const sizeRepresentation = (size: number, { decimalSeparator = '.', thousandSeparator = ',' }: {
+	/**
+	 * Default `'.'`. Character to use as the decimal separator.
+	 */
+	decimalSeparator?: string
+	/**
+	 * Default `','`. Character to use as the thousand separator.
+	 */
+	thousandSeparator?: string
+} = {}) => {
+	const units = ['', 'K', 'M', 'G', 'T', 'P', 'E']
 
 	let i = 0
 
@@ -39,41 +95,53 @@ export const bytesRepresentation = (size: number) => {
 		i += 1
 	}
 
-	return format(size, { decimals: 2, significativeNumber: true }) + ' ' + units[i]
+	return format(size, { decimals: 2, significativeNumber: true, decimalSeparator, thousandSeparator }) + ' ' + units[i]
 }
 
+/**
+ * Rounds a number to a specified number of decimal places using standard rounding rules (round half up).
+ * @param value The number to round.
+ * @param decimals The number of decimal places to round to.
+ * @returns The rounded number.
+ * @example
+ * ```javascript
+ * console.log(PUtilsNumber.round(3.14159))           // 3
+ * console.log(PUtilsNumber.round(3.14159, 2))        // 3.14
+ * console.log(PUtilsNumber.round(3.1459, 2))         // 3.15
+ * console.log(PUtilsNumber.round(123.456789, 4))     // 123.4568
+ * ```
+ */
 export const round = (value: number, decimals = 0) => {
 	const pow = Math.pow(10, decimals)
 	return Math.round(value * pow) / pow
 }
 
-export const noScientistNotation = (value: number) => {
-	const numberString = value.toString()
-	/* Descomposición del número completo */
-	const matches = numberString.match(/(-?)([0-9]*\.?[0-9]+)e([-+]?)([0-9]+)/)
-	if (!matches) return numberString
-	const sign = matches[1]
-	let number = matches[2]
-	const exponentialSign = matches[3]
-	let exponentialNumber = Number(matches[4])
-	/* Descomposición del número base */
-	const matches2 = number.match(/\./)
-	if (matches2) {
-		exponentialNumber += (number.length - (matches2.index ?? 0) - 1) * (exponentialSign === '-' ? 1 : -1)
-		number = number.replace('.', '')
-	}
-	/* Construye el número a presentar */
-	if (exponentialSign === '-') {
-		number = padStart(number, exponentialNumber + 1)
-		const index = number.length - exponentialNumber
-		number = number.substring(0, index) + '.' + number.substring(index)
-	} else {
-		number += padEnd('', exponentialNumber)
-	}
-	return `${sign}${number}`
+const units = {
+	[PLanguages.ENGLISH]: ['', 'UNO', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'],
+	[PLanguages.SPANISH]: ['', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'],
+}
+const tens = {
+	[PLanguages.ENGLISH]: ['', 'ELEVEN', 'TWELVE', 'THIRTEEN', 'FOURTEEN', 'FIFTEEN', 'SIXTEEN', 'SEVENTEEN', 'EIGHTEEN', 'NINETEEN'],
+	[PLanguages.SPANISH]: ['', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISEIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE'],
 }
 
-export const write = (value: number, decimals: number) => {
+/**
+ * Converts a numeric value to its written representation.
+ * @param value The number value to convert.
+ * @param decimals The number of decimal places to include in the output.
+ * @returns A string representing the number in words.
+ * @example
+ * ```javascript
+ * console.log(write(123)) // 'CIENTO VEINTITRÉS'
+ * console.log(write(123.45, 2)) // 'CIENTO VEINTITRÉS CON 45/100'
+ * console.log(write(123.4567, 3)) // 'CIENTO VEINTITRÉS CON 457/1000'
+ * console.log(write(123.999, 0)) // 'CIENTO VEINTICUATRO'
+ * ```
+ */
+export const write = (value: number, { decimals = 0, language = PLanguages.ENGLISH }: {
+	decimals?: number
+	language?: PLanguages
+} = {}) => {
 	const text = format(value, { decimals })
 
 	/* Separa la parte decimal */
@@ -98,9 +166,9 @@ export const write = (value: number, decimals: number) => {
 
 		let unityString
 		if (unity && ten === 1) {
-			unityString = ['', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISEIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE'][unity]
+			unityString = tens[language][unity]
 		} else {
-			unityString = ['', 'UNO', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'][unity]
+			unityString = units[language][unity]
 		}
 
 		results.push(`${hundredString}${(hundred && (ten || unity)) ? ' ' : ''}${tenString}${(ten > 2 && unity) ? ' Y ' : ''}${unityString}`)

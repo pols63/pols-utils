@@ -1,4 +1,4 @@
-import { formula } from '../src/putils/math'
+import { sizeRepresentation } from '../src/putils/number'
 
 // console.log(formula('1 + 2.2 + $uno + $dos', {
 // 	uno: '5',
@@ -7,4 +7,11 @@ import { formula } from '../src/putils/math'
 // 	cuatro: '$dos'
 // }))
 
-console.log(formula('constructor.constructor("return process")()'))
+// console.log(format(123456))
+// console.log(format(0))
+// console.log(format(-98765))
+
+// console.log(format(10e60, { decimals: 30, significativeNumber: false }))
+
+console.log(sizeRepresentation(2300)) // 2.3K
+console.log(sizeRepresentation(2300456)) // 2.3M

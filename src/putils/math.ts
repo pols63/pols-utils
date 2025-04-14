@@ -114,12 +114,12 @@ export const formula = (toEval: string, parameters?: PFormulaParameters): {
 	toEval = replaceRefereces(toEval, parameters)
 
 	/* Busca todos los tokens */
-	const tokens = new Set(toEval.match(/\b[a-z]+?[a-z0-9]*\b\(/ig) ?? [])
+	const tokens = new Set(toEval.match(/\b[a-z]+?[a-z0-9]*\b/ig) ?? [])
 
 	if (tokens.size) {
 		for (let token of Array.from(tokens)) {
-			token = token.substring(0, token.length - 1).toLowerCase()
-			if (!keywords.includes(token)) throw new Error(`The function '${token}' doesn't exists`)
+			token = token.toLowerCase()
+			if (!keywords.includes(token)) throw new Error(`The word '${token}' doesn't exists as formula`)
 			toEval = toEval.replace(new RegExp(token, 'ig'), `keywords.${token}`)
 		}
 	}
