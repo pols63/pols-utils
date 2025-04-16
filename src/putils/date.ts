@@ -1,5 +1,5 @@
 import { PLanguages } from "../constants"
-import { padStart } from "./string"
+import { padStart } from "./string.browser"
 
 export const DAYS: Record<PLanguages, string[]> = {
 	SPANISH: ['lunes', 'martes', 'mierrcoles', 'jueves', 'viernes', 'sabado', 'domingo'],

@@ -1,5 +1,5 @@
 import { PLanguages } from "../constants"
-import { padEnd } from "./string"
+import { padEnd } from "./string.browser"
 
 /**
  * Converts a number to a formatted string representation.
