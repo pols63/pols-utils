@@ -17,6 +17,7 @@
 	"exports": {
 		".": {
 			"import": "./dist/index.import.js",
+			"browser": "./dist/index.browser.js",
 			"require": "./dist/index.js",
 			"node": "./dist/index.js"
 		}
