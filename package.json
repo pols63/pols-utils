@@ -1,6 +1,6 @@
 {
 	"name": "pols-utils",
-	"version": "5.3.3",
+	"version": "5.3.4",
 	"main": "dist/index.js",
 	"module": "dist/index.js",
 	"browser": "dist/index.browser.js",
