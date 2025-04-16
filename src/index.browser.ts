@@ -8,3 +8,5 @@ export * as PUtilsArrayBuffer from './putils/arrayBuffer'
 export * as PUtilsObject from './putils/object'
 export * from './pbase64'
 export * from './constants'
+
+console.log('browser')
