@@ -367,16 +367,37 @@ export const isInteger = (value: number) => Math.ceil(value) === value
 export const pluralize = (value: number, singular: string, plural: string) => `${value} ${value == 1 ? singular : plural}`
 
 /**
- * 
- * @param value 
- * @param defaultValue 
- * @returns 
+ * Converts a value to a number.
+ * @param value The value to convert.
+ * @param defaultValue The value to return if the conversion fails.
+ * @returns The parsed number or `defaultValue` if the conversion is unsuccessful.
+ * @example
+ * ```javascript
+ * console.log(PUtilsNumber.parse('13')) // 13
+ * console.log(PUtilsNumber.parse('0.13')) // 0.13
+ * console.log(PUtilsNumber.parse('qwerty')) // 0
+ * console.log(PUtilsNumber.parse(null)) // 0
+ * console.log(PUtilsNumber.parse(true)) // 0
+ * console.log(PUtilsNumber.parse(false)) // 0
+ * ```
  */
-export const parse = (value?: unknown, defaultValue = 0) => {
+export const parse = (value?: unknown, defaultValue: number = 0) => {
 	const transformed = Number(value)
 	return isNaN(transformed) ? defaultValue : transformed
 }
 
+/**
+ * Pads a string or number with another string (repeated if necessary) until the resulting string reaches the specified length.
+ * @param value  The target string or number.
+ * @param length The minimun length of the resulting string.
+ * @param fillString The string used for padding. Defaults to `'0'`.
+ * @returns The padded string.
+ * @example
+ * ```javascript
+ * console.log(PUtilsNumber.padStart('123', 6)) // '000123'
+ * console.log(PUtilsNumber.padStart('123', 6, '_')) // '___123'
+ * ```
+ */
 export const padStart = (value: string | number, length: number, fillString = '0') => {
 	return String(value).padStart(length, fillString)
 }
