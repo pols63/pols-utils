@@ -144,10 +144,10 @@ const hundreds = ['DOCIENTOS', 'TRECIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEI
  * @returns A string representing the number in words.
  * @example
  * ```javascript
- * console.log(write(123)) // 'CIENTO VEINTITRÉS'
- * console.log(write(123.45, 2)) // 'CIENTO VEINTITRÉS CON 45/100'
- * console.log(write(123.4567, 3)) // 'CIENTO VEINTITRÉS CON 457/1000'
- * console.log(write(123.999, 0)) // 'CIENTO VEINTICUATRO'
+ * console.log(write(123)) // 'ONE HUNDRED TWENTI THREE'
+ * console.log(write(123.45, 2)) // 'ONE HUNDRED TWENTI THREE AND 45/100'
+ * console.log(write(123.4567, 3)) // 'ONE HUNDRED TWENTI THREE AND 457/1000'
+ * console.log(write(123.999, 0)) // 'ONE HUNDRED TWENTI FOUR'
  * ```
  */
 export const write = (value: number, { decimals = 0, language = PLanguages.ENGLISH }: {
@@ -229,10 +229,12 @@ export const write = (value: number, { decimals = 0, language = PLanguages.ENGLI
 		if (words.length) results.push(words.join(' '))
 	}
 
-	return results.join(' ').trim() + (decimals ? ` CON ${decimalText}/${padEnd('1', decimals + 1)}` : '')
+	return results.join(' ').trim() + (decimals ? ` ${language == PLanguages.ENGLISH ? 'AND' : 'CON'} ${decimalText}/${padEnd('1', decimals + 1)}` : '')
 }
 
-export type PToMatch = {
+export type PCompareString = `<${number}` | `<=${number}` | `>${number}` | `>=${number}` | `=${number}` | `!${number}`
+
+export type PCompareConditions = PCompareString | PCompareString[] | {
 	ne?: number,
 	eq?: number,
 	lt?: number,
@@ -240,22 +242,49 @@ export type PToMatch = {
 	gt?: number,
 	gte?: number,
 	in?: number[],
+	between?: [number, number],
 }
 
-/* Compara el número con los valores pasados en params en función al nombre del parámetro */
-export const compare = (value: number, params: PToMatch | string[] | string) => {
+/**
+ * Compares a number against one or more conditional expressions.
+ * @param value The number to evaluate.
+ * @param conditions Conditions to apply:
+ * * A a string like `'>10'`, `'<=50'` or `'!=0'`.
+ * * An array of string like [`'>10'`, `'<=50'`].
+ * * An object specifying one or more keys from the following:
+ *   * `ne`: not equal to
+ *   * `eq`: equal to
+ *   * `lt`: less than
+ *   * `lte`: less than or equal to
+ *   * `gt`: greater than
+ *   * `gte`: greater than or equal to
+ *   * `in`: value must be included in the provided array
+ *   * `between`: value must be between two numbers
+ * @returns `true` if all conditions in `params` evaluate to true for the given `value`; otherwise, `false`.
+ * @example
+ * ```javascript
+ * console.log(PUtilsNumber.compare(45, '>10')) // true
+ * console.log(PUtilsNumber.compare(45, '>50')) // false
+ * console.log(PUtilsNumber.compare(45, ['>10', '<50'])) // true
+ * console.log(PUtilsNumber.compare(45, '!=10')) // true
+ * console.log(PUtilsNumber.compare(45, '=45')) // true
+ * console.log(PUtilsNumber.compare(45, { gt: 10, lte: 50 }))          // true
+ * console.log(PUtilsNumber.compare(45, { in: [30, 40, 45, 50] }))     // true
+ * ``` 
+ */
+export const compare = (value: number, conditions: PCompareConditions | string[] | string) => {
 	if (isNaN(value)) return false
-	if (typeof params == 'string') params = params.split(';')
+	if (typeof conditions == 'string') conditions = conditions.split(';')
 
-	if (params instanceof Array) {
-		const newParams: PToMatch = {}
-		const expression = /^([<>]=?|=)(-?[0-9]*\.?[0-9]+)$/
-		for (const [i, param] of params.entries()) {
-			if (typeof param !== 'string') throw new Error(`El elemento ${i} no es de tipo 'string'`)
-			const parts = param.match(expression)
+	if (conditions instanceof Array) {
+		const newParams: PCompareConditions = {}
+		const expression = /^([!<>=]{1,2})(-?[0-9]*\.?[0-9]+)$/
+		for (const [i, param] of conditions.entries()) {
+			const parts = param.replace(/\s/, '').match(expression)
+			if (!parts) throw new Error(`Unknown expression: ${param}`)
 			const part2 = parse(parts?.[2])
-			switch (parts?.[1]) {
-				case '!=':
+			switch (parts[1]) {
+				case '!':
 					newParams.ne = part2
 					break
 				case '=':
@@ -273,13 +302,15 @@ export const compare = (value: number, params: PToMatch | string[] | string) => 
 				case '>=':
 					newParams.gte = part2
 					break
+				default:
+					throw new Error(`Unknown expression: ${parts[1]}`)
 			}
 		}
-		params = newParams
+		conditions = newParams
 	}
 
-	for (const property in params) {
-		const param = params[property]
+	for (const property in conditions) {
+		const param = conditions[property]
 
 		/* Valida si la comparación falla */
 		switch (property) {
@@ -304,19 +335,43 @@ export const compare = (value: number, params: PToMatch | string[] | string) => 
 			case 'in':
 				if (param.includes(value)) return false
 				break
+			case 'between':
+				if (value < conditions[property][0] || value > conditions[property][1]) return false
+				break
 		}
 	}
 	return true
 }
 
-export const isInteger = (value: number) => Math.ceil(value) == value
+/**
+ * Checks if `value` is an integer number.
+ * @param value The number to evaluate.
+ * @returns `true` if `value` is an integer number.
+ */
+export const isInteger = (value: number) => Math.ceil(value) === value
 
-export const isPositive = (value: number) => value >= 0
-
-export const isNegative = (value: number) => value < 0
-
+/**
+ * Returns the appropriate singular or plural form based on the given number.
+ * @param value The number to evaluate.
+ * @param singularThe string to return if `value` is exactly `1`.
+ * @param plural The string to return for all other values (including `0` and decimals).
+ * @returns The singular or plural string, depending of `value`.
+ * @example
+ * ```javascript
+ * console.log(PUtilsNumber.pluralize(45, 'item', 'items')) // 'items'
+ * console.log(PUtilsNumber.pluralize(1, 'item', 'items')) // 'item'
+ * console.log(PUtilsNumber.pluralize(0, 'item', 'items')) // 'items'
+ * console.log(PUtilsNumber.pluralize(0.5, 'item', 'items')) // 'items'
+ * ```
+ */
 export const pluralize = (value: number, singular: string, plural: string) => `${value} ${value == 1 ? singular : plural}`
 
+/**
+ * 
+ * @param value 
+ * @param defaultValue 
+ * @returns 
+ */
 export const parse = (value?: unknown, defaultValue = 0) => {
 	const transformed = Number(value)
 	return isNaN(transformed) ? defaultValue : transformed
