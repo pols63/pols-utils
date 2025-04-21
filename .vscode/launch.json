@@ -15,7 +15,7 @@
 			"runtimeArgs": [
 				"run",
 				"test",
-				"test/formula.ts"
+				"test/index.ts"
 			]
 		}
 	]

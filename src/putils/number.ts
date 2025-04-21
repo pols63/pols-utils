@@ -63,6 +63,8 @@ export const format = (value: number, { decimals = 0, decimalSeparator = '.', th
 	}
 }
 
+const sizeSufix = ['', 'K', 'M', 'G', 'T', 'P', 'E']
+
 /**
  * Converts a numeric value to a human-readable string representing a size in bytes. The value is divided by 1024 iteratively until it fits into a suitable unit (K, M, G, etc.).
  * @param size The numeric value in bytes to format.
@@ -86,11 +88,9 @@ export const sizeRepresentation = (size: number, { decimalSeparator = '.', thous
 	 */
 	thousandSeparator?: string
 } = {}) => {
-	const units = ['', 'K', 'M', 'G', 'T', 'P', 'E']
-
 	let i = 0
 
-	while (size >= 1024 && i < units.length - 1) {
+	while (size >= 1024 && i < sizeSufix.length - 1) {
 		size /= 1024.0
 		i += 1
 	}
@@ -117,13 +117,25 @@ export const round = (value: number, decimals = 0) => {
 }
 
 const units = {
-	[PLanguages.ENGLISH]: ['', 'UNO', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'],
-	[PLanguages.SPANISH]: ['', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'],
+	[PLanguages.ENGLISH]: ['ZERO', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'],
+	[PLanguages.SPANISH]: ['CERO', 'UNO', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'],
 }
-const tens = {
+const tenTwenty = {
 	[PLanguages.ENGLISH]: ['', 'ELEVEN', 'TWELVE', 'THIRTEEN', 'FOURTEEN', 'FIFTEEN', 'SIXTEEN', 'SEVENTEEN', 'EIGHTEEN', 'NINETEEN'],
 	[PLanguages.SPANISH]: ['', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISEIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE'],
 }
+
+const tens = {
+	[PLanguages.ENGLISH]: ['TWENTY', 'THIRTY', 'FOURTY', 'FIFTY', 'SIXTY', 'SEVENTY', 'EIGHTY', 'NINETY'],
+	[PLanguages.SPANISH]: ['TREINTA', 'CUARENTA', 'CINCUENTA', 'SESENTA', 'SETENTA', 'OCHENTA', 'NOVENTA'],
+}
+
+const separators = {
+	[PLanguages.ENGLISH]: ['THOUSAND', 'MILLION', 'BILLION', 'TRILLION', 'QUADRILLION', 'QUINTILLION', 'SEXTILLION', 'SEPTILLION', 'OCTILLION', 'NONILLION'],
+	[PLanguages.SPANISH]: ['MIL', 'MILLÓN', 'BILLÓN', 'TRILLÓN', 'CUATRILLÓN', 'QUINTILLÓN', 'SEXTILLÓN', 'SEPTILLÓN', 'OCTILLÓN', 'NONILLÓN'],
+}
+
+const hundreds = ['DOCIENTOS', 'TRECIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEICIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS']
 
 /**
  * Converts a numeric value to its written representation.
@@ -145,47 +157,79 @@ export const write = (value: number, { decimals = 0, language = PLanguages.ENGLI
 	const text = format(value, { decimals })
 
 	/* Separa la parte decimal */
-	const arr1 = text.split('.')
-	const parts = {
-		integer: padStart(arr1[0], Math.ceil(arr1[0].length / 3) * 3),
-		decimal: arr1[1]
-	}
-
-	/* Se divide cada tres caracteres la parte entera */
-	const groups = parts.integer.match(/.{1,3}/g) ?? []
+	const [integerText, decimalText] = text.split('.')
+	const integerParts = integerText.split(',').map(v => padStart(v, 3))
 
 	const results: string[] = []
-	for (const group of groups) {
+	for (const [i, group] of integerParts.entries()) {
+		const numb = Number(group)
 		const hundred = Number(group[0])
 		const ten = Number(group[1])
-		const unity = Number(group[2])
+		const unit = Number(group[2])
 
-		const hundredString = ['', (ten || unity) ? 'CIENTO' : 'CIEN', 'DOCIENTOS', 'TRECIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEICIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS'][hundred]
-
-		const tenString = ['', unity ? '' : 'DIEZ', unity ? 'VEINTI' : 'VEINTE', 'TREINTA', 'CUARENTA', 'CINCUENTA', 'SESENTA', 'SETENTA', 'OCHENTA', 'NOVENTA'][ten]
-
-		let unityString
-		if (unity && ten === 1) {
-			unityString = tens[language][unity]
-		} else {
-			unityString = units[language][unity]
+		let hundredString = ''
+		if (hundred) {
+			if (language == PLanguages.SPANISH) {
+				if (hundred == 1) {
+					hundredString = (ten || unit) ? 'CIENTO' : 'CIEN'
+				} else {
+					hundredString = hundreds[hundred - 2]
+				}
+			} else {
+				hundredString = `${units[language][hundred]} HUNDRED`
+			}
 		}
 
-		results.push(`${hundredString}${(hundred && (ten || unity)) ? ' ' : ''}${tenString}${(ten > 2 && unity) ? ' Y ' : ''}${unityString}`)
+		let tenString = ''
+		if (ten) {
+			if (language == PLanguages.SPANISH) {
+				if (ten == 1) {
+					tenString = unit ? '' : 'DIEZ'
+				} else if (ten == 2) {
+					tenString = unit ? 'VEINTI' : 'VEINTE'
+				} else {
+					tenString = tens[language][ten - 3]
+				}
+			} else {
+				if (ten == 1) {
+					tenString = unit ? '' : 'TEN'
+				} else {
+					tenString = tens[language][ten - 2]
+				}
+			}
+		}
+
+		let unitString: string
+		if (unit && ten === 1) {
+			unitString = tenTwenty[language][unit]
+		} else {
+			unitString = units[language][unit]
+		}
+
+		/* Palabras separadoras de miles */
+		const lastGroup = i == integerParts.length - 1
+		let separator = lastGroup ? '' : separators[language][integerParts.length - 2 - i]
+		if (numb > 1 && language == PLanguages.SPANISH) {
+			if (separator != 'MIL') separator = separator.replace('ÓN', 'ONES')
+		}
+
+		const words: string[] = []
+		if (hundredString) words.push(hundredString)
+		if (tenString) words.push(tenString)
+
+		if (tenString && language == PLanguages.SPANISH && unit && ten > 2) words.push('Y')
+
+		if (numb == 1 && language == PLanguages.SPANISH && !lastGroup) {
+			words.push(separator)
+		} else if (unit || (!unit && !words.length && !results.length)) {
+			words.push(unitString)
+			if (separator) words.push(separator)
+		}
+
+		if (words.length) results.push(words.join(' '))
 	}
 
-	const separators = ['', 'MIL', 'MILLÓN', 'BILLÓN', 'TRILLÓN', 'CUATRILLÓN', 'QUINTILLÓN', 'SEXTILLÓN', 'SEPTILLÓN', 'OCTILLÓN', 'NONILLÓN']
-	return results.map((r, i) => {
-		const indexSeparator = results.length - i - 1
-		let separator = separators[indexSeparator]
-		const num = Number(groups[i])
-		if (indexSeparator === 1 && num === 1) {
-			r = separator === 'MIL' ? '' : 'UN'
-		} else if (indexSeparator > 1 && num > 1) {
-			separator = separator.replace('ÓN', 'ONES')
-		}
-		return `${r} ${separator}`
-	}).join(' ').trim() + (decimals ? ` CON ${parts.decimal}/${padEnd('1', decimals + 1)}` : '')
+	return results.join(' ').trim() + (decimals ? ` CON ${decimalText}/${padEnd('1', decimals + 1)}` : '')
 }
 
 export type PToMatch = {
