@@ -266,7 +266,7 @@ export type PCompareConditions = PCompareString | PCompareString[] | {
  * console.log(PUtilsNumber.compare(45, '>10')) // true
  * console.log(PUtilsNumber.compare(45, '>50')) // false
  * console.log(PUtilsNumber.compare(45, ['>10', '<50'])) // true
- * console.log(PUtilsNumber.compare(45, '!=10')) // true
+ * console.log(PUtilsNumber.compare(45, '!10')) // true
  * console.log(PUtilsNumber.compare(45, '=45')) // true
  * console.log(PUtilsNumber.compare(45, { gt: 10, lte: 50 }))          // true
  * console.log(PUtilsNumber.compare(45, { in: [30, 40, 45, 50] }))     // true
