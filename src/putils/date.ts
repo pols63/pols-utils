@@ -14,8 +14,8 @@ export const MONTHS: Record<PLanguages, string[]> = {
 let globalLanguage = PLanguages.ENGLISH
 
 /**
- * Sets the global language for the `monthName`, `weekdayName` and `format` methods.
- * @param language Indicate the language.
+ * Sets the default global language for date-related methods such as `monthName`, `weekdayName`, and `format`.
+ * @param language The language to set as default.
  * @example
  * ```javascript
  * PUtilsDate.setGlobalLanguage(PLanguages.SPANISH)
@@ -29,11 +29,11 @@ export const setGlobalLanguage = (language: PLanguages) => {
 }
 
 /**
- * Gets the month name of the date.
- * @param date Target date.
- * @param shortName If `true` it gets the month name shortly. By example: `'september'` to `'sep'`.
- * @param language Indicate the language. If it isn't provided, it will use the `GlobalLanguage`.
- * @returns String month name.
+ * Returns the name of the month for a given date.
+ * @param date The target date.
+ * @param shortName If `true`, returns the abbreviated month name (e.g., `'September'` becomes `'Sep'`).
+ * @param language The language to use for the month name. If not provided, the global language is used.
+ * @returns The full or abbreviated month name as a string.
  */
 export const monthName = (date: Date, shortName = false, language?: PLanguages): string => {
 	if (isNaN(date.getTime())) throw new Error(`The date is invalid`)
@@ -43,11 +43,11 @@ export const monthName = (date: Date, shortName = false, language?: PLanguages):
 }
 
 /**
- * Gets the weekday name of the date.
- * @param date Target date.
- * @param shortName If `true` it gets the weekday name shortly. By example: `'tuesday'` to `'tue'`.
- * @param language Indicate the language. If it isn't provided, it will use the `GlobalLanguage`.
- * @returns String weekday name.
+ * Returns the name of the weekday for a given date.
+ * @param date The target date.
+ * @param shortName If `true`, returns the abbreviated weekday name (e.g., `'tuesday'` becomes `'tue'`).
+ * @param language The language to use for the weekday name. If not provided, the global language is used.
+ * @returns The full or abbreviated weekday name as a string.
  */
 export const weekdayName = (date: Date, shortName = false, language?: PLanguages): string => {
 	if (isNaN(date.getTime())) throw new Error(`The date is invalid`)
@@ -57,9 +57,10 @@ export const weekdayName = (date: Date, shortName = false, language?: PLanguages
 }
 
 /**
- * Gets the week number of the date.
- * @param date Target date.
- * @returns Number of week.
+ * Returns the week number for a given date using the US system.
+ * In this format, the week count starts on Sunday and the first week of the year always begins on January 1st.
+ * @param date The target date.
+ * @returns The week number of the year (starting from 1), based on the US convention.
  */
 export const getWeek = (date: Date): number => {
 	const onejan = new Date(date.getFullYear(), 0, 1)
@@ -67,52 +68,49 @@ export const getWeek = (date: Date): number => {
 }
 
 /**
- * Formats a given date according to a specified mask and language.
+ * Formats a given date according to a custom mask and language.
  * @function
- * @param date The target date to format.
- * @param mask A string representing the date format. Should include this wildcard:
- * * `@y`: Year
- * * `@m`: Month (`'1'` for january through `'12'` for december).
- * * `@mm`: Month with leading zero (`'01'` for january through `'12'` for december).
- * * `@mmm`: Shortname for Month (`'Jan'` for january through `'Dec'` for december).
- * * `@mmmm`: Name for Month (`'January'` for january through `'December'` for december).
- * * `@d`: Day (`'1'` through `'31'`).
- * * `@dd`: Day with leading zero (`'01'` through `'31'`).
- * * `@ddd`: Short weekday name (`'Sun'` for sunday through `'Sat'` for saturday).
- * * `@dddd`: Weekday name (`'Sunday'` for sunday through `'Saturday'` for saturday).
- * * `@w`: Week number on the year.
- * * `@h`: 24-Hour format (`'0'` through `'23'`).
- * * `@hh`: 24-Hour format with leading zero (`'00'` through `'23'`).
- * * `@o`: 12-Hour format (`'1'` through `'12'`).
- * * `@oo`: 12-Hour format with leading zero (`'01'` through `'12'`).
- * * `@i`: Minute (`'0'` through `'59'`).
- * * `@ii`: Minute with leading zero (`'00'` through `'59'`).
- * * `@s`: Second one digit (`0` through `59`).
- * * `@ss`: Second with leading zero (`'00'` through `'59'`).
- * * `@l`: Millisecond one digit (`'0'` through `'999'`).
- * * `@ll`: Millisecond with leading zero (`'00'` through `'999'`).
- * * `@lll`: Millisecond with leading zero (`'000'` through `'999'`).
- * * `@e`: 12-Hour format symbol (`'a'` and `'p'`).
- * * `@ee`: 12-Hour format symbol (`'am'` and `'pm'`).
- * * `@eee`: 12-Hour format symbol (`'a.m.'` and `'p.m.'`).
- * * `@E`: 12-Hour format symbol (`'A'` and `'P'`).
- * * `@EE`: 12-Hour format symbol (`'AM'` and `'PM'`).
- * * `@EEE`: 12-Hour format symbol (`'A.M.'` and `'P.M.'`).
- * If not provided, the `PUtilsDate.defaultMask` property is used.
- * @param language Specifying the language for days and months name of the formatted date. If not provided, the `PUtilsDate.defaultLanguage` property is used.
- * @returns A string with the formatted date based on the provided mask and language.
+ * @param date The date to format.
+ * @param mask A format string that supports the following wildcards:
+ * - `@y`      - Full year (e.g., `2025`)
+ * - `@m`      - Month number (1–12)
+ * - `@mm`     - Month number with leading zero (01–12)
+ * - `@mmm`    - Abbreviated month name (e.g., `Jan`)
+ * - `@mmmm`   - Full month name (e.g., `January`)
+ * - `@d`      - Day of the month (1–31)
+ * - `@dd`     - Day with leading zero (01–31)
+ * - `@ddd`    - Abbreviated weekday name (e.g., `Sun`)
+ * - `@dddd`   - Full weekday name (e.g., `Sunday`)
+ * - `@w`      - Week number (US system; starts at January 1st)
+ * - `@h`      - Hour in 24-hour format (0–23)
+ * - `@hh`     - Hour in 24-hour format with leading zero (00–23)
+ * - `@o`      - Hour in 12-hour format (1–12)
+ * - `@oo`     - Hour in 12-hour format with leading zero (01–12)
+ * - `@i`      - Minutes (0–59)
+ * - `@ii`     - Minutes with leading zero (00–59)
+ * - `@s`      - Seconds (0–59)
+ * - `@ss`     - Seconds with leading zero (00–59)
+ * - `@l`      - Milliseconds (0–999)
+ * - `@ll`     - Milliseconds with at least 2 digits (e.g., `09`, `95`, `120`)
+ * - `@lll`    - Milliseconds with 3 digits (e.g., `009`, `095`, `120`)
+ * - `@e`      - Lowercase meridiem (a/p)
+ * - `@ee`     - Lowercase meridiem (am/pm)
+ * - `@eee`    - Lowercase meridiem with dots (a.m./p.m.)
+ * - `@E`      - Uppercase meridiem (A/P)
+ * - `@EE`     - Uppercase meridiem (AM/PM)
+ * - `@EEE`    - Uppercase meridiem with dots (A.M./P.M.)
+ * 
+ * If no mask is provided, the `PUtilsDate.format.defaultMask` is used.
+ * @param language Optional. Specifies the language for month and weekday names. If not provided, the global language is used.
+ * @returns A formatted date string based on the provided mask and language.
  */
 export const format: ((date: Date, mask?: string, language?: PLanguages) => string) & {
 	/**
 	 * A default mask to use if `mask` not provided.
 	 */
 	defaultMask?: string;
-	/**
-	 * A default language to use if `language` not provided.
-	 */
-	defaultLanguage?: PLanguages;
 } = (date: Date, mask?: string, language?: PLanguages): string => {
-	if (!language) language = format.defaultLanguage ?? globalLanguage
+	if (!language) language = globalLanguage
 	const hours = date.getHours()
 	const hours12 = (hours % 12) || 12
 	const pm = hours >= 12
@@ -149,4 +147,3 @@ export const format: ((date: Date, mask?: string, language?: PLanguages) => stri
 		.replace(/@E/g, pm ? 'P' : 'A')
 }
 format.defaultMask = '@y-@mm-@dd @hh:@ii:@ss.@lll'
-format.defaultLanguage = PLanguages.ENGLISH
