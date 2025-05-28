@@ -95,7 +95,7 @@ export const sizeRepresentation = (size: number, { decimalSeparator = '.', thous
 		i += 1
 	}
 
-	return format(size, { decimals: 2, significativeNumber: true, decimalSeparator, thousandSeparator }) + ' ' + units[i]
+	return format(size, { decimals: 2, significativeNumber: true, decimalSeparator, thousandSeparator }) + ' ' + sizeSufix[i]
 }
 
 /**
