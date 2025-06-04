@@ -1,4 +1,5 @@
 import { PRecord } from "../constants"
+import { format } from "./date"
 
 export const getValue = (target: PRecord, path: string, stringToObject = true): unknown => {
 	const arr = path.split(/\./)
@@ -62,4 +63,14 @@ export const urlParametersToObject = (value: string): PRecord => {
 		result[subparts[0]] = subparts[1] ?? null
 	}
 	return result
+}
+
+export const stringify = (value: any, replacer?: (this: any, key: string, value: any) => any, space?: string) => {
+	return JSON.stringify(value, function (key, value) {
+		if (replacer) {
+			return replacer.bind(this)(key, value)
+		} else {
+			return this[key] instanceof Date ? format(this[key], '@y-@mm-@dd @hh:@ii:@ss.@lll') : value
+		}
+	}, space)
 }

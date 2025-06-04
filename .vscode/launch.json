@@ -15,7 +15,7 @@
 			"runtimeArgs": [
 				"run",
 				"test",
-				"test/index.ts"
+				"test/stringify.ts"
 			]
 		}
 	]
