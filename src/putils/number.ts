@@ -366,7 +366,7 @@ export const isInteger = (value: number) => Math.ceil(value) === value
  */
 export const pluralize = (value: number, singular: string, plural: string, format?: (value: number) => string) => {
 	const formatted = format?.(value) ?? value.toString()
-	return `${value} ${(value == 1 ? singular : plural).replace(/(?<!\?)\?(?!\?)/g, formatted)}`
+	return (value == 1 ? singular : plural).replace(/(?<!\?)\?(?!\?)/g, formatted)
 }
 
 /**
