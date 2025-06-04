@@ -364,7 +364,10 @@ export const isInteger = (value: number) => Math.ceil(value) === value
  * console.log(PUtilsNumber.pluralize(0.5, 'item', 'items')) // 'items'
  * ```
  */
-export const pluralize = (value: number, singular: string, plural: string) => `${value} ${value == 1 ? singular : plural}`
+export const pluralize = (value: number, singular: string, plural: string, format?: (value: number) => string) => {
+	const formatted = format?.(value) ?? value.toString()
+	return `${value} ${(value == 1 ? singular : plural).replace(/(?<!\?)\?(?!\?)/g, formatted)}`
+}
 
 /**
  * Converts a value to a number.
