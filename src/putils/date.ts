@@ -30,14 +30,22 @@ export const setGlobalLanguage = (language: PLanguages) => {
 
 /**
  * Returns the name of the month for a given date.
- * @param date The target date.
+ * @param date The target date or the number of the month between 1 to 12.
  * @param shortName If `true`, returns the abbreviated month name (e.g., `'September'` becomes `'Sep'`).
  * @param language The language to use for the month name. If not provided, the global language is used.
  * @returns The full or abbreviated month name as a string.
  */
-export const monthName = (date: Date, shortName = false, language?: PLanguages): string => {
-	if (isNaN(date.getTime())) throw new Error(`The date is invalid`)
-	const monthName = MONTHS[language ?? globalLanguage]?.[date.getMonth()]
+export const monthName = (date: Date | number, shortName = false, language?: PLanguages): string => {
+	let monthNumber: number
+	if (date instanceof Date) {
+		if (isNaN(date.getTime())) throw new Error(`The target is invalid date`)
+		monthNumber = date.getMonth()
+	} else {
+		if (!Number.isFinite(date) || Number.isNaN(date) || !Number.isSafeInteger(date)) throw new Error(`The target is invalid number. It must be a integer.`)
+		monthNumber = (date - 1) % 12
+	}
+
+	const monthName = MONTHS[language ?? globalLanguage]?.[monthNumber]
 	if (!monthName) return ''
 	return shortName ? monthName.substring(0, 3) : monthName
 }
