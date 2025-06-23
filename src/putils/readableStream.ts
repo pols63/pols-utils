@@ -1,6 +1,6 @@
 import stream from 'stream'
 
-export const isReadableSream = (value: unknown): value is stream.Readable => {
+export const isReadableStream = (value: unknown): value is stream.Readable => {
 	return (
 		typeof value === 'object'
 		&& value !== null

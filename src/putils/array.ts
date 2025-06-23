@@ -185,32 +185,22 @@ export const filterOne = <T, K = T>(array: T[], logicalSelector: PLogicalSelecto
  * ```
  */
 export const filter = <T, K = T>(array: T[], logicalSelector: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K[] => {
-	const results: T[] = []
-	for (const [i, element] of array.entries()) {
-		let success = true
-		if (typeof logicalSelector == 'object') {
-			if (typeof element != 'object') continue
-			for (const p in logicalSelector) {
-				const valueOfElement = getValue((element as unknown) as PRecord, p)
-				const queryProperty = logicalSelector[p]
-				if (queryProperty == null && valueOfElement == null) continue
-				if (queryProperty instanceof RegExp && typeof valueOfElement == 'string' && valueOfElement.match(queryProperty)) continue
-				if (valueOfElement !== logicalSelector[p]) {
-					success = false
-					break
+	const filtered = array.filter((element, i) => {
+		if (typeof logicalSelector === 'object') {
+			if (typeof element !== 'object') return false
+			return Object.entries(logicalSelector).every(([p, queryProperty]) => {
+				const valueOfElement = getValue(element as PRecord, p)
+				if (queryProperty == null && valueOfElement == null) return true
+				if (queryProperty instanceof RegExp && typeof valueOfElement == 'string') {
+					return valueOfElement.match(queryProperty)
 				}
-			}
+				return valueOfElement === queryProperty
+			})
 		} else {
-			success = !!logicalSelector(element, i)
+			return !!logicalSelector(element, i)
 		}
-		if (success) results.push(element)
-	}
-	
-	if (transform) {
-		return results.map(transform)
-	} else {
-		return results as any
-	}
+	})
+	return transform ? filtered.map(transform) : (filtered as unknown as K[])
 }
 
 /**
@@ -327,7 +317,7 @@ export const extract = <T, K = T>(array: T[], logicalSelector: PLogicalSelector<
 			i++
 		}
 	}
-	
+
 	if (transform) {
 		return results.map(transform)
 	} else {
