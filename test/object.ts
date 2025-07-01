@@ -19,3 +19,12 @@ console.log(getValue({
 		]]
 	}
 }, 'nuevo.hola.jojo.ert'))
+console.log(getValue({
+	nuevo: {
+		hola: [[
+			{ jojo: [{
+				ert: [1,2,3]
+			}] }
+		]]
+	}
+}, 'nuevo.hola.jojo.ert'))
