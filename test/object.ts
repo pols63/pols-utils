@@ -15,7 +15,7 @@ console.log(getValue({
 console.log(getValue({
 	nuevo: {
 		hola: [[
-			{ jojo: 'true' }
+			{ jojo: null }
 		]]
 	}
-}, 'nuevo.hola.jojo'))
+}, 'nuevo.hola.jojo.ert'))
