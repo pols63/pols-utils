@@ -1,22 +1,35 @@
 import { PRecord } from "../constants"
 import { format } from "./date"
 
-export const getValue = (target: PRecord, path: string, stringToObject = true): unknown => {
-	const arr = path.split(/\./)
+const getNotArray = (arr: unknown[]) => {
+	let searching = true
+	let reference: unknown = arr
+	while (searching) {
+		reference = reference[0]
+		if (!(reference instanceof Array)) return reference
+	}
+}
+
+export const getValue = (target: unknown, path: string, stringToObject = true): unknown | undefined => {
+	if (!path) return
+	const parts = path.split(/\./)
+	if (!parts.length) return
+
 	let reference: unknown = target
-	if (!reference) return
-	if (reference instanceof Array) reference = reference[0]
-	for (let i = 0; i < arr.length; i++) {
-		reference = (reference as PRecord)[arr[i]]
-		if (reference instanceof Array && i < arr.length - 1) {
-			reference = reference[0]
-		} else if (typeof reference == 'string' && i < arr.length - 1 && stringToObject) {
-			/* Si la referencia es una cadena y aún hay más propiedades para recorrer, se intenta convertir la cadena en objeto */
+	if (reference == null) return
+	// if (reference instanceof Array) reference = reference[0]
+
+	for (const [i, part] of parts.entries()) {
+		if (reference instanceof Array) {
+			reference = getNotArray(reference)
+		} else if (typeof reference == 'string') {
 			try {
 				reference = JSON.parse(reference)
 			} catch { /**/ }
 		}
-		if (!reference) return reference
+		if (reference == null) return
+
+		reference = (reference as any)[part]
 	}
 	return reference
 }
