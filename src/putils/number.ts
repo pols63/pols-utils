@@ -1,6 +1,23 @@
 import { PLanguages } from "../constants"
 import { padEnd } from "./string.browser"
 
+let globalLanguage = PLanguages.ENGLISH
+
+/**
+ * Sets the default global language for number-related methods such as `write`.
+ * @param language The language to set as default.
+ * @example
+ * ```javascript
+ * PUtilsNumber.setGlobalLanguage(PLanguages.SPANISH)
+ * console.log(PUtilsNumber.write(100)) // 'CIEN'
+ * PUtilsNumber.setGlobalLanguage(PLanguages.ENGLISH)
+ * console.log(PUtilsNumber.write(100)) // 'ONE HUNDRED'
+ * ```
+ */
+export const setGlobalLanguage = (language: PLanguages) => {
+	globalLanguage = language
+}
+
 /**
  * Converts a number to a formatted string representation.
  * @param value The numeric value to format.
@@ -141,6 +158,7 @@ const hundreds = ['DOCIENTOS', 'TRECIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEI
  * Converts a numeric value to its written representation.
  * @param value The number value to convert.
  * @param decimals The number of decimal places to include in the output.
+ * @param language Optional. Specifies the language. If not provided, the global language is used.
  * @returns A string representing the number in words.
  * @example
  * ```javascript
@@ -150,10 +168,11 @@ const hundreds = ['DOCIENTOS', 'TRECIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEI
  * console.log(write(123.999, 0)) // 'ONE HUNDRED TWENTI FOUR'
  * ```
  */
-export const write = (value: number, { decimals = 0, language = PLanguages.ENGLISH }: {
+export const write = (value: number, { decimals = 0, language }: {
 	decimals?: number
 	language?: PLanguages
 } = {}) => {
+	if (!language) language = globalLanguage
 	const text = format(value, { decimals })
 
 	/* Separa la parte decimal */
