@@ -139,7 +139,7 @@ const units = {
 }
 const tenTwenty = {
 	[PLanguages.ENGLISH]: ['', 'ELEVEN', 'TWELVE', 'THIRTEEN', 'FOURTEEN', 'FIFTEEN', 'SIXTEEN', 'SEVENTEEN', 'EIGHTEEN', 'NINETEEN'],
-	[PLanguages.SPANISH]: ['', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISEIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE'],
+	[PLanguages.SPANISH]: ['', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISÉIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE'],
 }
 
 const tens = {
@@ -152,7 +152,7 @@ const separators = {
 	[PLanguages.SPANISH]: ['MIL', 'MILLÓN', 'BILLÓN', 'TRILLÓN', 'CUATRILLÓN', 'QUINTILLÓN', 'SEXTILLÓN', 'SEPTILLÓN', 'OCTILLÓN', 'NONILLÓN'],
 }
 
-const hundreds = ['DOCIENTOS', 'TRECIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEICIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS']
+const hundreds = ['DOSCIENTOS', 'TRESCIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEISCIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS']
 
 /**
  * Converts a numeric value to its written representation.
@@ -235,20 +235,28 @@ export const write = (value: number, { decimals = 0, language }: {
 		const words: string[] = []
 		if (hundredString) words.push(hundredString)
 		if (language == PLanguages.SPANISH && tenString == 'VEINTI') {
+			switch (unitString) {
+				case 'DOS':
+					unitString = 'DÓS'
+					break
+				case 'TRES':
+					unitString = 'TRÉS'
+					break
+				case 'SEIS':
+					unitString = 'SÉIS'
+					break
+			}
 			unitString = `${tenString}${unitString}`
 		} else {
 			if (tenString) words.push(tenString)
 		}
 
 		if (tenString && language == PLanguages.SPANISH && unit && ten > 2) words.push('Y')
-
-		if (numb == 1 && language == PLanguages.SPANISH && !lastGroup) {
-			words.push(separator)
-		} else if (unit || (!unit && !words.length && !results.length)) {
-			words.push(unitString)
-			if (separator) words.push(separator)
-		}
-
+		if (
+			(unit && (numb != 1 || !separator))
+			|| (language == PLanguages.ENGLISH && (unit || !value))
+		) words.push(unitString)
+		if (numb > 0 && separator) words.push(separator)
 		if (words.length) results.push(words.join(' '))
 	}
 
