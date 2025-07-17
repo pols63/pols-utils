@@ -234,7 +234,11 @@ export const write = (value: number, { decimals = 0, language }: {
 
 		const words: string[] = []
 		if (hundredString) words.push(hundredString)
-		if (tenString) words.push(tenString)
+		if (language == PLanguages.SPANISH && tenString == 'VEINTI') {
+			unitString = `${tenString}${unitString}`
+		} else {
+			if (tenString) words.push(tenString)
+		}
 
 		if (tenString && language == PLanguages.SPANISH && unit && ten > 2) words.push('Y')
 

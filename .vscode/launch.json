@@ -15,7 +15,7 @@
 			"runtimeArgs": [
 				"run",
 				"test",
-				"test/object.ts"
+				"test/number.ts"
 			]
 		}
 	]
