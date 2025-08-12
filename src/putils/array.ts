@@ -484,3 +484,21 @@ export const indexBy = <T, K = never>(array: T[], setterPropertyName: (element: 
  * console.log(PUtilsArray.distinct(mynumbers)) // [0, 1, 2, 5, 6, 7]
  */
 export const distinct = <T>(array: T[]) => Array.from(new Set(array))
+
+/**
+ * Insert a element into an array if the element not exists.
+ * @param array The target array.
+ * @param element The element to insert.
+ * @returns It returns `true` if the element was inserted.
+ * @example
+ * ```javascript
+ * const mynumbers = [0, 1, 2]
+ * console.log(PUtilsArray.distinct(mynumbers, 3)) // true
+ * console.log(PUtilsArray.distinct(mynumbers, 3)) // false
+ */
+export const pushIfNotExists = (array: unknown[], element: unknown) => {
+	const index = array.indexOf(element)
+	const notExists = index == -1
+	if (notExists) array.push(element)
+	return notExists
+}
