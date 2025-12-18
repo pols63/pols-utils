@@ -19,11 +19,11 @@ export const toString = (readableStream: stream.Readable, encoding?: 'base64'): 
 		})
 
 		readableStream.on('end', () => {
-			const text = Buffer.concat(chunks).toString('base64')
+			const buffer = Buffer.concat(chunks)
 			if (encoding == 'base64') {
-				resolve(Buffer.from(text).toString('base64'))
+				resolve(buffer.toString('base64'))
 			} else {
-				resolve(text)
+				resolve(buffer.toString('utf8'))
 			}
 		})
 
