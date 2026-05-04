@@ -1,5 +1,6 @@
 import mimeTypes from 'mime-types'
 import fs from 'fs'
+import { Buffer } from 'node:buffer'
 
 const DEFAULT_MIME_TYPE = 'application/octet-stream'
 
@@ -45,6 +46,14 @@ export class PBase64 {
 	/** Get if the content is invalid. */
 	get isInvalid() {
 		return !this.content
+	}
+
+	static fromText(value: string, encoding: BufferEncoding = 'utf-8') {
+		const pBase64 = new PBase64
+		pBase64.mimeType = 'text/plain'
+		pBase64._content = Buffer.from(value, encoding).toString('base64')
+		pBase64.padding = pBase64._content.match(/(=*)$/)?.[1].length ?? pBase64.padding
+		return pBase64
 	}
 
 	/**

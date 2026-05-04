@@ -15,7 +15,7 @@
 			"runtimeArgs": [
 				"run",
 				"test",
-				"test/number.ts"
+				"test/text.ts"
 			]
 		}
 	]
