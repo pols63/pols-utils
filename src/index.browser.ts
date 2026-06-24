@@ -62,7 +62,6 @@ export {
 } from './putils/object'
 
 export {
-	toText,
 	toBase64
 } from './putils/file'
 
