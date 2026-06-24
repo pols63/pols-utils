@@ -6,8 +6,7 @@
 	"scripts": {
 		"build": "npx tsc",
 		"test": "npx ts-node-dev -r tsconfig-paths/register --project tsconfig.json",
-		"export": "npm run build && npm publish",
-		"docs": "npx typedoc --customCss ./src/custom.css"
+		"export": "npm run build && npm publish"
 	},
 	"author": "Jean Paul Sánchez mendoza",
 	"license": "ISC",
@@ -24,12 +23,9 @@
 		"@eslint/js": "^9.13.0",
 		"@types/mime-types": "^2.1.4",
 		"@types/node": "^22.7.9",
-		"esdoc": "^1.1.0",
-		"esdoc-standard-plugin": "^1.0.0",
 		"eslint": "^9.13.0",
 		"globals": "^15.11.0",
 		"tsconfig-paths": "^4.2.0",
-		"typedoc": "^0.28.2",
 		"typescript": "^5.6.3",
 		"typescript-eslint": "^8.11.0"
 	},

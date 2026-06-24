@@ -82,3 +82,84 @@ export * as PUtilsObject from './putils/object'
 export * as PUtils from './putils/base'
 export * from './pbase64'
 export * from './constants'
+
+// Re-export individual unique functions directly for root access
+export {
+	swap,
+	moveItem,
+	filterOne,
+	filter,
+	extractOne,
+	extract,
+	groupBy,
+	toggleElement,
+	chunks,
+	indexBy,
+	distinct,
+	pushIfNotExists
+} from './putils/array'
+
+export {
+	monthName,
+	weekdayName,
+	getWeek
+} from './putils/date'
+
+export {
+	sizeRepresentation,
+	round,
+	write,
+	compare,
+	pluralize,
+	parse
+} from './putils/number'
+
+export {
+	capitalize,
+	highlight,
+	withoutAccentMark,
+	textMatch,
+	compareWithoutAccentMarks,
+	subStart,
+	subEnd,
+	padStart,
+	padEnd
+} from './putils/string.browser'
+
+export {
+	toReadableStream
+} from './putils/string'
+
+export {
+	getValue,
+	setValue,
+	toUrlParameters,
+	urlParametersToObject,
+	stringify
+} from './putils/object'
+
+export {
+	toBase64
+} from './putils/file'
+
+export {
+	existsDirectory,
+	existsFile
+} from './putils/fs'
+
+export {
+	throttle,
+	debounce
+} from './putils/function'
+
+export {
+	isReadableStream
+} from './putils/readableStream'
+
+export {
+	formula
+} from './putils/math'
+
+export {
+	coalesce
+} from './putils/base'
