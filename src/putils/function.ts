@@ -16,15 +16,15 @@
  * myfuncThrottle() // Ignored: called to soon.
  * ```
  */
-export const throttle = (func: (...args: any[]) => any, preventTime: number) => {
-	let idTimeout: ReturnType<typeof setTimeout> | null
-	return function (...args: unknown[]) {
+export const throttle = <T extends (...args: any[]) => any>(func: T, preventTime: number) => {
+	let idTimeout: ReturnType<typeof setTimeout> | null = null
+	return function (this: any, ...args: Parameters<T>): ReturnType<T> | undefined {
 		if (!idTimeout) {
 			idTimeout = setTimeout(() => idTimeout = null, preventTime)
 		} else {
 			return
 		}
-		return func(...args)
+		return func.apply(this, args)
 	}
 }
 
@@ -51,10 +51,10 @@ export const throttle = (func: (...args: any[]) => any, preventTime: number) => 
  * myfuncDebounce() // Reset time. It cancel the called one and after 1 seconde: 'Call 2'
  * ```
  */
-export const debounce = (func: (...args: unknown[]) => void, delay: number) => {
-	let idTimeout: ReturnType<typeof setTimeout> | null
-	return function (...args: unknown[]) {
+export const debounce = <T extends (...args: any[]) => void>(func: T, delay: number) => {
+	let idTimeout: ReturnType<typeof setTimeout> | null = null
+	return function (this: any, ...args: Parameters<T>): void {
 		if (idTimeout) clearTimeout(idTimeout)
-		idTimeout = setTimeout(() => func(...args), delay)
+		idTimeout = setTimeout(() => func.apply(this, args), delay)
 	}
 }

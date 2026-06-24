@@ -17,7 +17,7 @@ const replaceRefereces = (toEval: string, parameters: PFormulaParameters) => {
 	return toEval
 }
 
-const tree = (mainBranch: string, branch: string, whoCalls: Record<string, string[]>) => {
+const tree = (mainBranch: string, branch: string, whoCalls: Record<string, string[]>): boolean => {
 	const references = whoCalls[branch]
 	if (!references) return false
 	if (references.includes(mainBranch)) return true
@@ -111,7 +111,13 @@ export const formula = (toEval: string, parameters?: PFormulaParameters): {
 	}
 
 	/* Busca las referencias y las reemplaza */
-	toEval = replaceRefereces(toEval, parameters)
+	toEval = replaceRefereces(toEval, parameters || {})
+
+	/* Validar que no contenga caracteres extraños (previene RCE) */
+	const safeCheck = toEval.replace(/\b(avg|pow|e|pi)\b/gi, '')
+	if (/[^\d+\-*/().,\s]/.test(safeCheck)) {
+		throw new Error(`Invalid characters in formula`)
+	}
 
 	/* Busca todos los tokens */
 	const tokens = new Set(toEval.match(/\b[a-z]+?[a-z0-9]*\b/ig) ?? [])
@@ -120,12 +126,12 @@ export const formula = (toEval: string, parameters?: PFormulaParameters): {
 		for (let token of Array.from(tokens)) {
 			token = token.toLowerCase()
 			if (!keywords.includes(token)) throw new Error(`The word '${token}' doesn't exists as formula`)
-			toEval = toEval.replace(new RegExp(token, 'ig'), `keywords.${token}`)
+			toEval = toEval.replace(new RegExp(token, 'ig'), `math.${token}`)
 		}
 	}
 
 	try {
-		const result = new Function(`return ${toEval}`)()
+		const result = new Function('math', `return ${toEval}`)(math)
 		return {
 			formula: toEval,
 			result: (isNaN(result) && typeof result !== 'string') ? null : result

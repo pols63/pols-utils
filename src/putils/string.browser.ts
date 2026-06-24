@@ -34,10 +34,7 @@ export const highlight = (value: string, tag = 'b') => value.replace(new RegExp(
  * @param value The target text.
  * @returns The same string value without accent marks.
  */
-export const withoutAccentMark = (value?: string) => {
-	const accentMarks: Record<string, string> = { Á: 'A', É: 'E', Í: 'I', Ó: 'O', Ú: 'U', á: 'a', é: 'e', í: 'i', ó: 'o', ú: 'u' }
-	return value?.replace(/á|é|í|ó|ú|Á|É|Í|Ó|Ú/g, (v) => accentMarks[v])
-}
+export const withoutAccentMark = (value?: string) => value?.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 
 /**
  * Evaluates whether a text matches another text. The comparison is case-insensitive, ignores accent marks, and allows partial word matching.
@@ -149,7 +146,6 @@ export const padEnd = (value: string | number, length: number, fillString = '0')
  * @param enconding The encoding format. Defaults to `'utf-8'`.
  * @returns An `ArrayBuffer` representation of the string.
  */
-export const toArrayBuffer = (value: string, enconding: BufferEncoding = 'utf-8') => {
-	const buffer = Buffer.from(value, enconding)
-    return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
+export const toArrayBuffer = (value: string) => {
+	return new TextEncoder().encode(value).buffer
 }

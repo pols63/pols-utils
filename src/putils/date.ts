@@ -2,8 +2,8 @@ import { PLanguages } from "../constants"
 import { padStart } from "./string.browser"
 
 export const DAYS: Record<PLanguages, string[]> = {
-	SPANISH: ['lunes', 'martes', 'mierrcoles', 'jueves', 'viernes', 'sabado', 'domingo'],
-	ENGLISH: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+	SPANISH: ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
+	ENGLISH: ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'],
 }
 
 export const MONTHS: Record<PLanguages, string[]> = {
@@ -112,6 +112,36 @@ export const getWeek = (date: Date): number => {
  * @param language Optional. Specifies the language for month and weekday names. If not provided, the global language is used.
  * @returns A formatted date string based on the provided mask and language.
  */
+const formatMap: Record<string, (date: Date, language: PLanguages, hours12: number, pm: boolean) => string> = {
+	'@y': (date) => date.getFullYear().toString(),
+	'@mmmm': (date, language) => monthName(date, false, language),
+	'@mmm': (date, language) => monthName(date, true, language),
+	'@mm': (date) => padStart(date.getMonth() + 1, 2, "0"),
+	'@m': (date) => (date.getMonth() + 1).toString(),
+	'@dddd': (date, language) => weekdayName(date, false, language),
+	'@ddd': (date, language) => weekdayName(date, true, language),
+	'@dd': (date) => padStart(date.getDate(), 2),
+	'@d': (date) => date.getDate().toString(),
+	'@hh': (date) => padStart(date.getHours(), 2),
+	'@h': (date) => date.getHours().toString(),
+	'@oo': (date, language, hours12) => padStart(hours12, 2),
+	'@o': (date, language, hours12) => hours12.toString(),
+	'@ii': (date) => padStart(date.getMinutes(), 2),
+	'@i': (date) => date.getMinutes().toString(),
+	'@ss': (date) => padStart(date.getSeconds(), 2),
+	'@s': (date) => date.getSeconds().toString(),
+	'@lll': (date) => padStart(date.getMilliseconds(), 3),
+	'@ll': (date) => padStart(date.getMilliseconds(), 2),
+	'@l': (date) => date.getMilliseconds().toString(),
+	'@w': (date) => getWeek(date).toString(),
+	'@eee': (date, language, hours12, pm) => pm ? 'p.m.' : 'a.m.',
+	'@ee': (date, language, hours12, pm) => pm ? 'pm' : 'am',
+	'@e': (date, language, hours12, pm) => pm ? 'p' : 'a',
+	'@EEE': (date, language, hours12, pm) => pm ? 'P.M.' : 'A.M.',
+	'@EE': (date, language, hours12, pm) => pm ? 'PM' : 'AM',
+	'@E': (date, language, hours12, pm) => pm ? 'P' : 'A',
+}
+
 export const format: ((date: Date, mask?: string, language?: PLanguages) => string) & {
 	/**
 	 * A default mask to use if `mask` not provided.
@@ -119,39 +149,13 @@ export const format: ((date: Date, mask?: string, language?: PLanguages) => stri
 	defaultMask?: string;
 } = (date: Date, mask?: string, language?: PLanguages): string => {
 	if (!language) language = globalLanguage
+	if (isNaN(date.getTime())) return ''
+
 	const hours = date.getHours()
 	const hours12 = (hours % 12) || 12
 	const pm = hours >= 12
-	if (isNaN(date.getTime())) return ''
-	return (mask ?? format.defaultMask ?? '')
-		.replace(/@y/g, date.getFullYear().toString())
-		.replace(/@mmmm/g, monthName(date, false, language))
-		.replace(/@mmm/g, monthName(date, true, language))
-		.replace(/@mm/g, padStart(date.getMonth() + 1, 2, "0"))
-		.replace(/@m/g, (date.getMonth() + 1).toString())
-		.replace(/@dddd/g, weekdayName(date, false, language))
-		.replace(/@ddd/g, weekdayName(date, true, language))
-		.replace(/@dd/g, padStart(date.getDate(), 2))
-		.replace(/@d/g, date.getDate().toString())
-		/* 24 horas */
-		.replace(/@hh/g, padStart(date.getHours(), 2))
-		.replace(/@h/g, date.getHours().toString())
-		/* 12 horas */
-		.replace(/@oo/g, padStart(hours12, 2))
-		.replace(/@o/g, hours.toString())
-		.replace(/@ii/g, padStart(date.getMinutes(), 2))
-		.replace(/@i/g, date.getMinutes().toString())
-		.replace(/@ss/g, padStart(date.getSeconds(), 2))
-		.replace(/@s/g, date.getSeconds().toString())
-		.replace(/@lll/g, padStart(date.getMilliseconds(), 3))
-		.replace(/@ll/g, padStart(date.getMilliseconds(), 2))
-		.replace(/@l/g, date.getMilliseconds().toString())
-		.replace(/@w/g, getWeek(date).toString())
-		.replace(/@eee/g, pm ? 'p.m.' : 'a.m.')
-		.replace(/@ee/g, pm ? 'pm' : 'am')
-		.replace(/@e/g, pm ? 'p' : 'a')
-		.replace(/@EEE/g, pm ? 'P.M.' : 'A.M.')
-		.replace(/@EE/g, pm ? 'PM' : 'AM')
-		.replace(/@E/g, pm ? 'P' : 'A')
+
+	const regex = /@(?:mmmm|dddd|mmm|ddd|eee|EEE|lll|mm|dd|hh|oo|ii|ss|ll|ee|EE|y|m|d|h|o|i|s|l|w|e|E)/g
+	return (mask ?? format.defaultMask ?? '').replace(regex, (match) => formatMap[match](date, language, hours12, pm))
 }
 format.defaultMask = '@y-@mm-@dd @hh:@ii:@ss.@lll'

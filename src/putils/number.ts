@@ -364,7 +364,7 @@ export const compare = (value: number, conditions: PCompareConditions | string[]
 				if (value == param) return false
 				break
 			case 'in':
-				if (param.includes(value)) return false
+				if (!param.includes(value)) return false
 				break
 			case 'between':
 				if (value < conditions[property][0] || value > conditions[property][1]) return false
@@ -373,13 +373,6 @@ export const compare = (value: number, conditions: PCompareConditions | string[]
 	}
 	return true
 }
-
-/**
- * Checks if `value` is an integer number.
- * @param value The number to evaluate.
- * @returns `true` if `value` is an integer number.
- */
-export const isInteger = (value: number) => Math.ceil(value) === value
 
 /**
  * Returns the appropriate singular or plural form based on the given number.

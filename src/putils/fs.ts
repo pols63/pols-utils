@@ -6,9 +6,11 @@ import fs from 'fs'
  * @returns `true` is the directory exists, otherwise `false`.
  */
 export const existsDirectory = (location: string): boolean => {
-	if (!fs.existsSync(location)) return false
-	const stats = fs.statSync(location)
-	return stats.isDirectory()
+	try {
+		return fs.statSync(location).isDirectory()
+	} catch {
+		return false
+	}
 }
 
 /**
@@ -17,7 +19,9 @@ export const existsDirectory = (location: string): boolean => {
  * @returns `true` is the file exists, otherwise `false`.
  */
 export const existsFile = (location: string): boolean => {
-	if (!fs.existsSync(location)) return false
-	const stats = fs.statSync(location)
-	return stats.isFile()
+	try {
+		return fs.statSync(location).isFile()
+	} catch {
+		return false
+	}
 }

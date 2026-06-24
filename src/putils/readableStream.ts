@@ -1,13 +1,10 @@
 import stream from 'stream'
 
 export const isReadableStream = (value: unknown): value is stream.Readable => {
-	return (
-		typeof value === 'object'
-		&& value !== null
-		&& 'getReader' in value && typeof value.getReader == 'function'
-		&& 'on' in value && typeof value.on == 'function'
-		&& 'locked' in value && typeof value.locked == 'function'
-	)
+	if (typeof value !== 'object' || value === null) return false
+	const isNodeStream = 'on' in value && typeof (value as any).on === 'function' && 'pipe' in value && typeof (value as any).pipe === 'function'
+	const isWebStream = 'getReader' in value && typeof (value as any).getReader === 'function' && 'locked' in value
+	return isNodeStream || isWebStream
 }
 
 export const toString = (readableStream: stream.Readable, encoding?: 'base64'): Promise<string> => {

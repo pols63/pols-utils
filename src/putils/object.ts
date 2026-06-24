@@ -54,26 +54,27 @@ export const setValue = (target: PRecord, path: string, value: unknown): void =>
 }
 
 export const toUrlParameters = (obj: PRecord) => {
-	return Object.keys(obj).map(key => {
+	const params = new URLSearchParams()
+	for (const key of Object.keys(obj)) {
 		const value = obj[key]
-		let valueToEncode: string | number | boolean = ''
-		if (typeof value == 'object') {
-			valueToEncode = JSON.stringify(value)
-		} else if (typeof value == 'string' || typeof value == 'boolean' || typeof value == 'number') {
-			valueToEncode = value
+		if (value == null) {
+			params.append(key, '')
+		} else if (typeof value === 'object') {
+			params.append(key, JSON.stringify(value))
+		} else {
+			params.append(key, String(value))
 		}
-		return `${encodeURIComponent(key)}=${obj[key] == null ? '' : encodeURIComponent(valueToEncode)}`
-	}).join("&")
+	}
+	return params.toString()
 }
 
 export const urlParametersToObject = (value: string): PRecord => {
 	const query = value.match(/^\??(.*)$/)?.[1]
 	if (!query) return {}
-	const parts = query.split('&')
+	const params = new URLSearchParams(query)
 	const result: PRecord = {}
-	for (const part of parts) {
-		const subparts = part.split('=')
-		result[subparts[0]] = subparts[1] ?? null
+	for (const key of params.keys()) {
+		result[key] = params.get(key)
 	}
 	return result
 }

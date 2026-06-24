@@ -17,19 +17,12 @@ import { getValue } from "./object"
  */
 export const swap = (array: unknown[], originIndex: number, destinationIndex: number) => {
 	if (originIndex < 0 || originIndex >= array.length) throw new Error(`'oldIndex' está fuera de los límites permitidos`)
-	if (Math.ceil(originIndex) != originIndex) throw new Error(`'oldIndex' debe ser un número entero`)
+	if (!Number.isInteger(originIndex)) throw new Error(`'oldIndex' debe ser un número entero`)
 	if (destinationIndex < 0 || destinationIndex >= array.length) throw new Error(`'oldIndex' está fuera de los límites permitidos`)
-	if (Math.ceil(destinationIndex) != destinationIndex) throw new Error(`'oldIndex' debe ser un número entero`)
+	if (!Number.isInteger(destinationIndex)) throw new Error(`'oldIndex' debe ser un número entero`)
 	if (originIndex == destinationIndex) throw new Error(`'oldIndex' y 'newIndex' no deben tener el mismo valor`)
 
-	const el1 = array[originIndex]
-	const el2 = array[destinationIndex]
-	array.splice(destinationIndex, 1, el1)
-	if (el2) {
-		array.splice(originIndex, 1, el2)
-	} else {
-		array.splice(originIndex, 1)
-	}
+	;[array[originIndex], array[destinationIndex]] = [array[destinationIndex], array[originIndex]];
 	return array
 }
 
@@ -49,9 +42,9 @@ export const swap = (array: unknown[], originIndex: number, destinationIndex: nu
  */
 export const moveItem = (array: unknown[], originIndex: number, destinationIndex: number) => {
 	if (originIndex < 0 || originIndex >= array.length) throw new Error(`'oldIndex' está fuera de los límites permitidos`)
-	if (Math.ceil(originIndex) != originIndex) throw new Error(`'oldIndex' debe ser un número entero`)
+	if (!Number.isInteger(originIndex)) throw new Error(`'oldIndex' debe ser un número entero`)
 	if (destinationIndex < 0 || destinationIndex >= array.length) throw new Error(`'oldIndex' está fuera de los límites permitidos`)
-	if (Math.ceil(destinationIndex) != destinationIndex) throw new Error(`'oldIndex' debe ser un número entero`)
+	if (!Number.isInteger(destinationIndex)) throw new Error(`'oldIndex' debe ser un número entero`)
 	if (originIndex == destinationIndex) throw new Error(`'oldIndex' y 'newIndex' no deben tener el mismo valor`)
 
 	const el1 = array[originIndex]
@@ -119,39 +112,29 @@ export type PLogicalSelector<T> = (Partial<T> & Record<string, unknown>) | ((ele
 export const filterOne = <T, K = T>(array: T[], logicalSelector: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K | undefined => {
 	if (array == null || !array.length) return
 
-	let result: T
-	let index = -1
-	for (const [i, element] of array.entries()) {
-		let success = true
-		if (typeof logicalSelector == 'object') {
-			if (typeof element != 'object') continue
+	const index = array.findIndex((element, i) => {
+		if (logicalSelector && typeof logicalSelector == 'object') {
+			if (typeof element != 'object' || element === null) return false
 			for (const p in logicalSelector) {
 				const valueOfElement = getValue((element as unknown) as PRecord, p)
 				const queryProperty = logicalSelector[p]
 				if (queryProperty == null && valueOfElement == null) continue
 				if (queryProperty instanceof RegExp && typeof valueOfElement == 'string' && valueOfElement.match(queryProperty)) continue
 				if (valueOfElement !== queryProperty) {
-					success = false
-					break
+					return false
 				}
 			}
-		} else {
-			success = !!logicalSelector(element, i)
+			return true
+		} else if (typeof logicalSelector == 'function') {
+			return !!logicalSelector(element, i)
 		}
-		if (success) {
-			result = element
-			index = i
-			break
-		}
-	}
+		return false
+	})
 
 	if (index == -1) return
 
-	if (transform) {
-		return transform(result, index)
-	} else {
-		return result as any
-	}
+	const result = array[index]
+	return transform ? transform(result, index) : (result as any)
 }
 
 /**
@@ -186,19 +169,20 @@ export const filterOne = <T, K = T>(array: T[], logicalSelector: PLogicalSelecto
  */
 export const filter = <T, K = T>(array: T[], logicalSelector: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K[] => {
 	const filtered = array.filter((element, i) => {
-		if (typeof logicalSelector === 'object') {
-			if (typeof element !== 'object') return false
+		if (logicalSelector && typeof logicalSelector === 'object') {
+			if (typeof element !== 'object' || element === null) return false
 			return Object.entries(logicalSelector).every(([p, queryProperty]) => {
 				const valueOfElement = getValue(element as PRecord, p)
 				if (queryProperty == null && valueOfElement == null) return true
 				if (queryProperty instanceof RegExp && typeof valueOfElement == 'string') {
-					return valueOfElement.match(queryProperty)
+					return !!valueOfElement.match(queryProperty)
 				}
 				return valueOfElement === queryProperty
 			})
-		} else {
+		} else if (typeof logicalSelector === 'function') {
 			return !!logicalSelector(element, i)
 		}
+		return false
 	})
 	return transform ? filtered.map(transform) : (filtered as unknown as K[])
 }
@@ -233,36 +217,30 @@ export const filter = <T, K = T>(array: T[], logicalSelector: PLogicalSelector<T
 export const extractOne = <T, K = T>(array: T[], logicalSelector: PLogicalSelector<T>, transform?: (element: T | null, i: number) => K): K | undefined => {
 	if (array == null || !array?.length) return
 
-	let result: T
-	let index = -1
-	for (const [i, element] of array.entries()) {
-		let success = true
-		if (typeof logicalSelector == 'object') {
-			if (typeof element != 'object') continue
+	const index = array.findIndex((element, i) => {
+		if (logicalSelector && typeof logicalSelector == 'object') {
+			if (typeof element != 'object' || element === null) return false
 			for (const p in logicalSelector) {
-				if (getValue((element as unknown) as PRecord, p) !== logicalSelector[p]) {
-					success = false
-					break
+				const valueOfElement = getValue((element as unknown) as PRecord, p)
+				const queryProperty = logicalSelector[p]
+				if (queryProperty == null && valueOfElement == null) continue
+				if (queryProperty instanceof RegExp && typeof valueOfElement == 'string' && valueOfElement.match(queryProperty)) continue
+				if (valueOfElement !== queryProperty) {
+					return false
 				}
 			}
-		} else {
-			success = !!logicalSelector(element, i)
+			return true
+		} else if (typeof logicalSelector == 'function') {
+			return !!logicalSelector(element, i)
 		}
-		if (success) {
-			result = element
-			index = i
-			break
-		}
-	}
+		return false
+	})
 
 	if (index == -1) return
 
+	const result = array[index]
 	array.splice(index, 1)
-	if (transform) {
-		return transform(result, index)
-	} else {
-		return result as any
-	}
+	return transform ? transform(result, index) : (result as any)
 }
 
 /**
@@ -300,16 +278,25 @@ export const extract = <T, K = T>(array: T[], logicalSelector: PLogicalSelector<
 	while (i < array.length) {
 		const element = array[i]
 		let success = true
-		if (typeof logicalSelector == 'object') {
-			if (typeof element != 'object') continue
-			for (const p in logicalSelector) {
-				if (getValue((element as unknown) as PRecord, p) !== logicalSelector[p]) {
-					success = false
-					break
+		if (logicalSelector && typeof logicalSelector == 'object') {
+			if (typeof element != 'object' || element === null) {
+				success = false
+			} else {
+				for (const p in logicalSelector) {
+					const valueOfElement = getValue((element as unknown) as PRecord, p)
+					const queryProperty = logicalSelector[p]
+					if (queryProperty == null && valueOfElement == null) continue
+					if (queryProperty instanceof RegExp && typeof valueOfElement == 'string' && valueOfElement.match(queryProperty)) continue
+					if (valueOfElement !== queryProperty) {
+						success = false
+						break
+					}
 				}
 			}
-		} else {
+		} else if (typeof logicalSelector == 'function') {
 			success = !!logicalSelector(element, i)
+		} else {
+			success = false
 		}
 		if (success) {
 			results.push(array.splice(i, 1)[0])
@@ -483,7 +470,7 @@ export const indexBy = <T, K = never>(array: T[], setterPropertyName: (element: 
  * const mynumbers = [0, 1, 2, 2, 2, 5, 6, 7, 7, 7]
  * console.log(PUtilsArray.distinct(mynumbers)) // [0, 1, 2, 5, 6, 7]
  */
-export const distinct = <T>(array: T[]) => Array.from(new Set(array))
+export const distinct = <T>(array: T[]) => [...new Set(array)]
 
 /**
  * Insert a element into an array if the element not exists.
